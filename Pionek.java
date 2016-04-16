@@ -2,9 +2,6 @@ package grafika;
 
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -13,13 +10,11 @@ import enums.Kolor;
 
 public class Pionek extends JComponent {
 
-	private static final int _A = 65;
 	private static final long serialVersionUID = 1L;
 	private final Image image;
 	private boolean pressed;
 	private int xPos;
 	private int yPos;
-	private MouseListener listener;
 
 	public Pionek(Kolor kolor) {
 		super();
@@ -31,30 +26,14 @@ public class Pionek extends JComponent {
 		xPos = 0;
 		yPos = 0;
 		pressed = false;
-		listener = new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				Coordinates[][] temp = Szachownica.getPlanszaPola();
-				Coordinates check = temp[xPos - _A][8 - yPos];
-				if (e.getX() >= check.getX()
-						&& e.getX() <= check.getX()
-								+ image.getWidth(null)
-						&& e.getY() >= check.getY()
-						&& e.getY() <= check.getY() + image.getHeight(null)) {
-					pressed = true;
-				} else {
-					pressed = false;
-				}
-			}
-		};
-
 	}
 
-	public MouseListener getListener() {
-		return listener;
+	protected boolean checkMove(Coordinates point, Pionek pionek) {
+		return false;
 	}
 
-	public void setListener(MouseListener listener) {
-		this.listener = listener;
+	protected Coordinates getPoint(int x, int y) {
+		return null;
 	}
 
 	public void paintComponent(Graphics g) {
