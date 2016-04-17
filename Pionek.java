@@ -15,9 +15,11 @@ public class Pionek extends JComponent {
 	private boolean pressed;
 	private int xPos;
 	private int yPos;
+	private Kolor kolor;
 
 	public Pionek(Kolor kolor) {
 		super();
+		setKolor(kolor);
 		if (kolor == Kolor.Czerwony) {
 			image = new ImageIcon("czerwony.png").getImage();
 		} else {
@@ -73,6 +75,14 @@ public class Pionek extends JComponent {
 
 	public void setPressed(boolean pressed) {
 		this.pressed = pressed;
+	}
+
+	public Kolor getKolor() {
+		return kolor;
+	}
+
+	public void setKolor(Kolor kolor) {
+		this.kolor = kolor;
 	}
 
 }
