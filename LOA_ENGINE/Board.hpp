@@ -12,7 +12,7 @@
 class Board{
 	char brd[8][8];
 public:
-	Board();
+	Board(Player*,Player*);
 	void draw_pawns();
 	void show_board();
 	void clear_board();

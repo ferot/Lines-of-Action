@@ -11,10 +11,15 @@
 
 class Point{
 private:
-	short int x,y;
-	Point(int,int);
-	Point map_coords(int x,int y);
+
+
+
 public:
+	short int x,y;
+	Point map_coords();
+	Point();
+	Point(int,int);
+
 	short int get_coord(char);
 };
 

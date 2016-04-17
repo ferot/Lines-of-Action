@@ -11,12 +11,14 @@
 class Pawn{
 
 
-	inline void set_coords(Point p){
-		x=p.get_coord('x');
-		y=p.get_coord('y');
+	/*inline void set_coords(Point P){
+		p.x=P.get_coord('x');
+		p.y=P.get_coord('y');
 	}
+	*/
 public:
-	short int x,y;
+short int get_coord(char which);
+	Point p;
 	Pawn();
 
 

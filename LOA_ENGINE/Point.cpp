@@ -8,13 +8,20 @@
 #include "Point.hpp"
 const int BAD_COORD = -666;
 const int BAD_COORD_MAPPING = -667;
-Point::Point(int a,int b):x(8-a),y(b-65){
+Point::Point(int x1,int y1):x(x1),y(y1){
 
 }
-Point Point::map_coords(int x,int y){
-	//TODO sprawdü czy dane sπ z zakresu 1-8 i A-H
-	if(x<1 ||x>8 || y >73 || y < 65)
-		return Point(8-x,y-65);
+Point::Point():y(0),x(0){
+
+}
+Point Point::map_coords(){
+	// sprawdü czy dane sπ z zakresu 1-8 i A-H
+	if((y>0 && y<9) && (x <73 && x > 64))
+	{
+		short int x2=x-65;
+		short int y2=8-y;
+		return Point(x2,y2);
+	}
 	else throw BAD_COORD_MAPPING;
 }
 /**
