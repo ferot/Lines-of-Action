@@ -2,6 +2,7 @@ package board;
 
 import enums.Kolor;
 import grafika.Coordinates;
+import grafika.Marker;
 import grafika.Pionek;
 import grafika.Szachownica;
 
@@ -17,7 +18,6 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import javax.swing.Timer;
 
 public class Board extends JPanel implements ActionListener{
 
@@ -31,7 +31,7 @@ public class Board extends JPanel implements ActionListener{
 	private ImageIcon plansza;
 	private List<Pionek> biale;
 	private List<Pionek> czerwone;
-	private Timer timer;
+	private List<Marker> marker;
 	private static int poleXSize;
 	private static int poleYSize;
 
@@ -45,12 +45,11 @@ public class Board extends JPanel implements ActionListener{
 		setVisible(true);
 		biale = new ArrayList<Pionek>();
 		czerwone = new ArrayList<Pionek>();
+		marker = new ArrayList<Marker>();
 		add(biale, Kolor.Bialy);
 		add(czerwone, Kolor.Czerwony);
 		placePawns(biale, Kolor.Bialy);
 		placePawns(czerwone, Kolor.Czerwony);
-		timer = new Timer(20, this);
-		timer.start();
 		addMouseListener(newMouseListener());
 	}
 
@@ -66,6 +65,9 @@ public class Board extends JPanel implements ActionListener{
 		for (Pionek pion : czerwone) {
 			pion.paintComponent(g2d);
 		}
+		for (Marker mark : marker) {
+			mark.paintComponent(g2d);
+		}
 		Toolkit.getDefaultToolkit().sync();
 		g.dispose();
 	}
@@ -75,11 +77,11 @@ public class Board extends JPanel implements ActionListener{
 		for (Pionek pion : list) {
 			if (kolor == Kolor.Bialy) {
 				if (i < AMOUNT_OF_PAWNS / 2) {
-					pion.setyPos(i + 2);
 					pion.setxPos(_A + 0);
+					pion.setyPos(i + 2);
 				} else {
-					pion.setyPos(i - 4);
 					pion.setxPos(7 + _A);
+					pion.setyPos(i - 4);
 				}
 			} else if (kolor == Kolor.Czerwony) {
 				if (i < AMOUNT_OF_PAWNS / 2) {
@@ -123,6 +125,7 @@ public class Board extends JPanel implements ActionListener{
 					if (checkMove(pole, pawn)) { // TODO metoda od Fera
 						pawn.setxPos(pole.getX());
 						pawn.setyPos(pole.getY());
+						removeMarkers(pawn);
 						System.out.println(pole.getX() + ", " + pole.getY());
 						pawn.setPressed(false);
 						Board.this.repaint();
@@ -130,7 +133,7 @@ public class Board extends JPanel implements ActionListener{
 					 }
 				}
 				checkPawnClicked(pole);
-				
+				Board.this.repaint();
 			}
 
 			private boolean checkMove(Coordinates pole, Pionek pawn) {
@@ -171,16 +174,30 @@ public class Board extends JPanel implements ActionListener{
 
 	}
 
+	protected void removeMarkers(Pionek pawn) {
+		List<Marker> toDelete = new ArrayList<Marker>();
+		for (Marker mark : marker) {
+			if (mark.getPawn().equals(pawn)) {
+				toDelete.add(mark);
+			}
+		}
+		marker.removeAll(toDelete);
+	}
+
 	protected boolean checkPawnClicked(Coordinates pole) {
 		for (Pionek pawn : biale){
 			if (pawn.getxPos() == pole.getX() && pawn.getyPos() == pole.getY()){
 				pawn.setPressed(true);
+				marker.add(new Marker(pawn, pole));
+				//TODO dodac tutaj zaznaczenie pól dla wszystkich mo¿liwoœci ruchu
 				return true;
 			}
 		}
 		for (Pionek pawn : czerwone){
 			if (pawn.getxPos() == pole.getX() && pawn.getyPos() == pole.getY()){
 				pawn.setPressed(true);
+				marker.add(new Marker(pawn, pole));
+				//TODO dodac tutaj zaznaczenie pól dla wszystkich mo¿liwoœci ruchu
 				return true;
 			}
 		}
