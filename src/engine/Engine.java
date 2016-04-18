@@ -1,6 +1,6 @@
 package engine;
 
-import enums.Kolor;
+import enums.PlayerColor;
 import gui.Marker;
 import gui.Pawn;
 
@@ -16,7 +16,7 @@ public final class Engine {
 	private static final int AMOUNT_OF_PAWNS = 12;
 
 	private static List<Pawn> pawns;
-	private static Kolor turn;
+	private static PlayerColor turn;
 	private static List<Marker> marker;
 
 	// **********************************************************
@@ -24,16 +24,16 @@ public final class Engine {
 	// **********************************************************
 
 	static {
-		List<Pawn> biale =new ArrayList<Pawn>();
-		List<Pawn> czerwone = new ArrayList<Pawn>();
-		add(biale, Kolor.Bialy);
-		add(czerwone, Kolor.Czerwony);
-		placePawns(biale, Kolor.Bialy);
-		placePawns(czerwone, Kolor.Czerwony);
+		List<Pawn> whites =new ArrayList<Pawn>();
+		List<Pawn> reds = new ArrayList<Pawn>();
+		add(whites, PlayerColor.WHITE);
+		add(reds, PlayerColor.RED);
+		placePawns(whites, PlayerColor.WHITE);
+		placePawns(reds, PlayerColor.RED);
 		pawns = new ArrayList<Pawn>();
-		pawns.addAll(biale);
-		pawns.addAll(czerwone);
-		turn = Kolor.Czerwony;
+		pawns.addAll(whites);
+		pawns.addAll(reds);
+		turn = PlayerColor.RED;
 		marker = new ArrayList<Marker>();
 	}
 
@@ -44,7 +44,7 @@ public final class Engine {
 	public static boolean checkPawnClicked(Coordinates pole) {
 		for (Pawn pawn : pawns) {
 			if (pawn.getxPos() == pole.getX() && pawn.getyPos() == pole.getY()
-					&& pawn.getKolor() == turn) {
+					&& pawn.getColor() == turn) {
 				pawn.setPressed(true);
 				marker.add(new Marker(pawn, pole));
 				marker.addAll(getPossibleMoves(pawn));
@@ -60,11 +60,10 @@ public final class Engine {
 	}
 
 	public static void changeTurn() {
-		turn = (turn == Kolor.Bialy ? Kolor.Czerwony : Kolor.Bialy);
+		turn = (turn == PlayerColor.WHITE ? PlayerColor.RED : PlayerColor.WHITE);
 	}
 
 	public static Collection<? extends Marker> getPossibleMoves(Pawn pion) {
-		pion.getxPos();
 		return new ArrayList<Marker>();
 		// TODO metoda od fera
 	}
@@ -93,37 +92,44 @@ public final class Engine {
 		marker.removeAll(toDelete);
 	}
 
+	public static void move(Pawn pawn, Coordinates pole) {
+		pawn.setxPos(pole.getX());
+		pawn.setyPos(pole.getY());
+		pawn.setPressed(false);
+
+	}
+
 	// ********************************************************************************
 	// Metody prywatne
 	// ********************************************************************************
 
-	private static void placePawns(List<Pawn> list, Kolor kolor) {
+	private static void placePawns(List<Pawn> list, PlayerColor color) {
 		int i = 0;
-		for (Pawn pion : list) {
-			if (kolor == Kolor.Bialy) {
+		for (Pawn pawn : list) {
+			if (color == PlayerColor.WHITE) {
 				if (i < AMOUNT_OF_PAWNS / 2) {
-					pion.setxPos(_A + 0);
-					pion.setyPos(i + 2);
+					pawn.setxPos(_A + 0);
+					pawn.setyPos(i + 2);
 				} else {
-					pion.setxPos(7 + _A);
-					pion.setyPos(i - 4);
+					pawn.setxPos(7 + _A);
+					pawn.setyPos(i - 4);
 				}
-			} else if (kolor == Kolor.Czerwony) {
+			} else if (color == PlayerColor.RED) {
 				if (i < AMOUNT_OF_PAWNS / 2) {
-					pion.setxPos(i + 1 + _A);
-					pion.setyPos(1);
+					pawn.setxPos(i + 1 + _A);
+					pawn.setyPos(1);
 				} else {
-					pion.setxPos(i - 5 + _A);
-					pion.setyPos(8);
+					pawn.setxPos(i - 5 + _A);
+					pawn.setyPos(8);
 				}
 			}
 			i++;
 		}
 	}
 
-	private static void add(List<Pawn> list, Kolor kolor) {
+	private static void add(List<Pawn> list, PlayerColor color) {
 		for (int i = 0; i < AMOUNT_OF_PAWNS; i++) {
-			list.add(new Pawn(kolor));
+			list.add(new Pawn(color));
 		}
 	}
 
@@ -135,7 +141,7 @@ public final class Engine {
 		return pawns;
 	}
 
-	public static Kolor getTurn() {
+	public static PlayerColor getTurn() {
 		return turn;
 	}
 

@@ -7,10 +7,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import engine.Coordinates;
-import enums.Kolor;
+import enums.PlayerColor;
 
 public class Pawn extends JComponent {
 
+	private static final String WHITE_PATH = "images/bialy.png";
+	private static final String RED_PATH = "images/czerwony.png";
 	private static final int _H = 72;
 	private static final int _A = 65;
 	private static final long serialVersionUID = 1L;
@@ -18,15 +20,15 @@ public class Pawn extends JComponent {
 	private boolean pressed;
 	private int xPos;
 	private int yPos;
-	private Kolor kolor;
+	private PlayerColor kolor;
 
-	public Pawn(Kolor kolor) {
+	public Pawn(PlayerColor kolor) {
 		super();
 		setKolor(kolor);
-		if (kolor == Kolor.Czerwony) {
-			image = new ImageIcon("czerwony.png").getImage();
+		if (kolor == PlayerColor.RED) {
+			image = new ImageIcon(RED_PATH).getImage();
 		} else {
-			image = new ImageIcon("bialy.png").getImage();
+			image = new ImageIcon(WHITE_PATH).getImage();
 		}
 		xPos = 0;
 		yPos = 0;
@@ -44,8 +46,8 @@ public class Pawn extends JComponent {
 	public void paintComponent(Graphics g) {
 		if (xPos >= _A && xPos <= _H && yPos >= 1 && yPos <= 8) {
 			g.drawImage(image,
-					Chessboard.getPlanszaPola()[xPos - _A][8 - yPos].getX(),
-					Chessboard.getPlanszaPola()[xPos - _A][8 - yPos].getY(),
+					Chessboard.getChessboardFields()[xPos - _A][8 - yPos].getX(),
+					Chessboard.getChessboardFields()[xPos - _A][8 - yPos].getY(),
 					null);
 		} else {
 			System.out.println("Nieprawid³owe wspó³rzêdne: [" + xPos + ", "
@@ -81,11 +83,11 @@ public class Pawn extends JComponent {
 		this.pressed = pressed;
 	}
 
-	public Kolor getKolor() {
+	public PlayerColor getColor() {
 		return kolor;
 	}
 
-	public void setKolor(Kolor kolor) {
+	public void setKolor(PlayerColor kolor) {
 		this.kolor = kolor;
 	}
 

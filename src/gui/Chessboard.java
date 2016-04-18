@@ -6,36 +6,37 @@ import engine.Coordinates;
 
 public class Chessboard {
 
-	private final static ImageIcon PLANSZA = new ImageIcon("szachownica.png");
-	private final static int PLANSZA_POLA_SIZE = 8;
+	private static final String CHESSBOARD_PATH = "images/szachownica.png";
+	private final static ImageIcon CHESSBOARD = new ImageIcon(CHESSBOARD_PATH);
+	private final static int CHESSBOARD_FIELD_SIZE = 8;
 	private static final int MARGIN_WIDTH = 11;
 	private static final int MARGIN_HEIGHT = 11;
-	private static final int WIDTH = PLANSZA.getIconWidth();
-	private static final int HEIGHT = PLANSZA.getIconWidth();
+	private static final int WIDTH = CHESSBOARD.getIconWidth();
+	private static final int HEIGHT = CHESSBOARD.getIconWidth();
 
-	private static Coordinates planszaPola[][];
+	private static Coordinates chessboardFields[][];
 
-	public static ImageIcon getPlansza() {
-		return PLANSZA;
+	public static ImageIcon getChessboard() {
+		return CHESSBOARD;
 	}
 
-	public static Coordinates[][] getPlanszaPola() {
-		return planszaPola;
+	public static Coordinates[][] getChessboardFields() {
+		return chessboardFields;
 	}
 
-	public static void setPlanszaPola(Coordinates planszaPola[][]) {
-		Chessboard.planszaPola = planszaPola;
+	public static void setChessboardFields(Coordinates chessboardFds[][]) {
+		Chessboard.chessboardFields = chessboardFds;
 	}
 
 	static {
-		setPlanszaPola(new Coordinates[PLANSZA_POLA_SIZE][PLANSZA_POLA_SIZE]);
+		setChessboardFields(new Coordinates[CHESSBOARD_FIELD_SIZE][CHESSBOARD_FIELD_SIZE]);
 		int height = HEIGHT - 2 * MARGIN_HEIGHT;
 		int width = WIDTH - 2 * MARGIN_WIDTH;
-		for (int j = 0; j < PLANSZA_POLA_SIZE; j++) {
-			for (int i = 0; i < PLANSZA_POLA_SIZE; i++) {
-				planszaPola[j][i] = new Coordinates(MARGIN_HEIGHT + 2 + j
-						* height / PLANSZA_POLA_SIZE,
-						i * width / PLANSZA_POLA_SIZE + MARGIN_WIDTH + 2);
+		for (int j = 0; j < CHESSBOARD_FIELD_SIZE; j++) {
+			for (int i = 0; i < CHESSBOARD_FIELD_SIZE; i++) {
+				chessboardFields[j][i] = new Coordinates(MARGIN_HEIGHT + 2 + j
+						* height / CHESSBOARD_FIELD_SIZE, i * width
+						/ CHESSBOARD_FIELD_SIZE + MARGIN_WIDTH + 2);
 			}
 		}
 	}
