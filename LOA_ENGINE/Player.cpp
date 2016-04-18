@@ -13,7 +13,9 @@ Player::Player(Color c): color(c){
 
 	set_symbol();
 
-	//creates pawns and assigns initial pawn's coordinates
+	/*creates pawns and assigns initial pawn's coordinates
+	 * coords are in format 1-8 A-H
+	 */
 	if(color==white){
 		int n=7;
 		for(unsigned int i=0;i<NUMBER_OF_PAWNS;i++)
@@ -35,7 +37,7 @@ Player::Player(Color c): color(c){
 
 	}
 	else{
-		int n=7;
+		int n=0;
 			for(unsigned int i=0;i<NUMBER_OF_PAWNS;i++)
 			{
 
@@ -43,17 +45,19 @@ Player::Player(Color c): color(c){
 
 				if(i<6){
 					Pawns[i].p.y=8;
-					Pawns[i].p.x='H'-n--;
+					Pawns[i].p.x='B'+n++;
 				}
 				else{
 					if(i==6)
-						n=7;
+						n=0;
 					Pawns[i].p.y=1;
-					Pawns[i].p.x='H'-n--;
+					Pawns[i].p.x='B'+n++;
 				}
 			}
 
 	}
 		;//TODO: generacja pionków czarnych ('poziomych')
 }
-
+short int Player::get_nr_pawns(){
+	return 0;
+}

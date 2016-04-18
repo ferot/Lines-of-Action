@@ -15,13 +15,15 @@ class Pawn{
 		p.x=P.get_coord('x');
 		p.y=P.get_coord('y');
 	}
-	*/
+	 */
 public:
-short int get_coord(char which);
+	short int get_coord(char which);
 	Point p;
 	Pawn();
-
-
+	Pawn(Point);
+	inline	bool operator == (const Pawn &PWN){
+		return(PWN.p.x==p.x && PWN.p.y==p.y);
+	}
 };
 
 

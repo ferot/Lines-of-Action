@@ -4,21 +4,19 @@
  *  Created on: 20 mar 2016
  *      Author: Fero
  */
-
-#ifndef PLAYER_HPP_
-#define PLAYER_HPP_h
 #include <vector>
 #include "Pawn.hpp"
+#ifndef PLAYER_HPP_
+#define PLAYER_HPP_h
+#include "Color.hpp"
 
-enum Color{
-	white=0,
-	black
-};
+
 
 class Player{
 
 	const unsigned short int NUMBER_OF_PAWNS =12;
 public:
+	short int get_nr_pawns();
 	char symbol=' ';
 	//short int get_coords
 	Color color;
