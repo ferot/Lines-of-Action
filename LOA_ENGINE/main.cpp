@@ -12,6 +12,7 @@ using namespace std;
 int main(){
 	try{
 		Color Col;
+		Dist_type dt;
 
 
 		cout<<"POINT tests"<<endl<<endl;
@@ -52,11 +53,18 @@ int main(){
 		b.draw_pawns();
 		b.show_board();
 		cout<<endl<<"AUTOMAT tests"<<endl<<endl;
-Automat A(&p1,&p2);
-A.move_pawn(Point('A',2),Point('B',5),white);
-A.move_pawn(Point('F',8),Point('D',2),black);
-b.draw_pawns();
+		Automat A(&p1,&p2,&b);
+		A.move_pawn(Point('A',2),Point('B',5),white);
+		A.move_pawn(Point('F',8),Point('D',2),black);
+		b.draw_pawns();
 		b.show_board();
+		cout<<endl<<"BOARD::count_move tests"<<endl<<endl;
+		assert(b.count_move(Pawn(Point('A',4)),dt=v)==3);
+		assert(b.count_move(Pawn(Point('C',8)),dt=v)==5);
+		assert(b.count_move(Pawn(Point('D',1)),dt=h)==4);
+		assert(b.count_move(Pawn(Point('B',5)),dt=h)==3);
+		assert(b.count_move(Pawn(Point('D',7)),dt=dl)==3);
+		assert(b.count_move(Pawn(Point('D',7)),dt=dr)==4);
 	}
 	catch(int a){
 		cout<<"ERRROR NR : "<<a;

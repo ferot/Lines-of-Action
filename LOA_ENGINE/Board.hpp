@@ -9,6 +9,12 @@
 #ifndef BOARD_HPP_
 #define BOARD_HPP_
 
+enum Dist_type{
+	v,
+	h,
+	dl,// "\"
+	dr// "/"
+};
 class Board{
 	char brd[8][8];
 public:
@@ -17,6 +23,8 @@ public:
 	void show_board();
 	void clear_board();
 	void map_coords(Point);
+	short int count_move(Pawn,Dist_type type);
+	bool out_of_boundary(int x,int y);
 	Player * P1;
 	Player * P2;
 };

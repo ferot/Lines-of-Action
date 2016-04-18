@@ -40,9 +40,9 @@ void Board::show_board(){
 void Board::draw_pawns(){
 	clear_board();
 	unsigned short int i = 0;
-	unsigned short int j= 0;
+	unsigned short int j = 0;
 	do{
-		//TODO: UWAGA - tutaj mog¹ byc potencjalne bugi : np. b³êdne koordynaty itd.
+		// UWAGA - tutaj mog¹ byc potencjalne bugi : np. b³êdne koordynaty itd.
 		Point p1,p2;
 		p1=(P1->Pawns[i]).p.map_coords();
 		p2=P2->Pawns[j].p.map_coords();
@@ -56,10 +56,89 @@ void Board::draw_pawns(){
 
 }
 
-/*
- * Method maps
- */
-void Board::map_coords(Point P){
+short int Board::count_move(Pawn A,Dist_type type){
+	short int dist=0;
 
+	Point temp=A.p.map_coords();
+
+	switch(type){
+	case v:
+
+		for(int j=0;j<8;j++){
+			if(	brd[temp.y][j]!=' ')
+				dist++;
+		}
+
+		return dist;
+
+	case h:
+		for(int j=0;j<8;j++){
+			if(	brd[j][temp.x]!=' ')
+				dist++;
+		}
+		return dist;
+	case dl:// "\"
+		int x=temp.y;
+		int y=temp.x;
+		x--;
+		y--;
+
+		//check upper-left corner
+		while(!out_of_boundary(x,y)){
+			if((brd[y][x]!=' '))
+				dist++;
+			x--;
+			y--;
+		}
+		x=temp.y;
+		y=temp.x;
+		x++;
+		y++;
+		//check down-right corner
+		while(!out_of_boundary(x,y)){
+			if((brd[y][x]!=' '))
+				dist++;
+			x++;
+			y++;
+		}
+		return (++dist);//remember to count the pawn (itself)!!
+	case dr:// "/"
+		int x2=temp.y;
+		int y2=temp.x;
+		x2++;
+		y2++;
+
+		//check upper-right corner
+		while(!out_of_boundary(x2,y2)){
+			if((brd[y2][x2]!=' '))
+				dist++;
+			x2++;
+			y2++;
+		}
+		x2=temp.y;
+		y2=temp.x;
+		x2--;
+		y2--;
+		//check down-left corner
+		while(!out_of_boundary(x2,y2)){
+			if((brd[y2][x2]!=' '))
+				dist++;
+			x2--;
+			y2--;
+		}
+		return (++dist);//remember to count the pawn!!
+		return 0;
+	default :
+		return 0;
+	}
+}
+
+/*
+ * Method checks if desired point is out of matrix boundary (in 'standard' format
+ */
+bool Board::out_of_boundary(int x,int y){
+	if(x>=0&&y>=0 && x<8 && y<8)
+		return false;
+	else return true;
 
 }

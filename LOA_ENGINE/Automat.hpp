@@ -20,9 +20,12 @@ class Automat{
 public:
 	void process_game_state(game_state GS);
 	void move_pawn(Point,Point,Color);
+	short int count_move(Pawn);
 	Player *PW;
 	Player *PB;
-	Automat(Player*,Player*);
+	Board *BRD;
+
+	Automat(Player*,Player*,Board*);
 
 };
 
