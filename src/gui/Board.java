@@ -19,10 +19,10 @@ public class Board extends JPanel {
 	private static final int _A = 65;
 	private static final int WIDTH = Chessboard.getChessboard().getIconWidth();
 	private static final int HEIGHT = Chessboard.getChessboard().getIconWidth();
-	protected static final int FIELD_1_X = 12;
-	protected static final int FIELD_1_Y = 397;
-	private ImageIcon chessboard;
+	private static final int FIELD_1_X = 12;
+	private static final int FIELD_1_Y = 397;
 
+	private ImageIcon chessboard;
 	private static int fieldXSize;
 	private static int fieldYSize;
 

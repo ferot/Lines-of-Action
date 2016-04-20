@@ -1,5 +1,6 @@
 package engine;
 
+import enums.MoveDirection;
 import enums.PlayerColor;
 import gui.Marker;
 import gui.Pawn;
@@ -15,6 +16,8 @@ public final class Engine {
 	private static final int _A = 65;
 	private static final int AMOUNT_OF_PAWNS = 12;
 
+	private static List<Pawn> whites;
+	private static List<Pawn> reds;
 	private static List<Pawn> pawns;
 	private static PlayerColor turn;
 	private static List<Marker> marker;
@@ -24,8 +27,8 @@ public final class Engine {
 	// **********************************************************
 
 	static {
-		List<Pawn> whites =new ArrayList<Pawn>();
-		List<Pawn> reds = new ArrayList<Pawn>();
+		whites = new ArrayList<Pawn>();
+		reds = new ArrayList<Pawn>();
 		add(whites, PlayerColor.WHITE);
 		add(reds, PlayerColor.RED);
 		placePawns(whites, PlayerColor.WHITE);
@@ -55,8 +58,14 @@ public final class Engine {
 	}
 
 	public static void checkGameFinished() {
-		// TODO metoda od fera
-
+		// TODO Obsluga wyst¹pienia zdarzenia tam gdzie return
+		if (whites.size() <= 1)
+			return;
+		if (reds.size() <= 1)
+			return;
+		// for (Pawn pawn : whites) {
+		//
+		// }
 	}
 
 	public static void changeTurn() {
@@ -64,8 +73,83 @@ public final class Engine {
 	}
 
 	public static Collection<? extends Marker> getPossibleMoves(Pawn pion) {
+//		short int Board::count_move(Pawn A,Dist_type type){
+//			short int dist=0;
+//
+//			Point temp=A.p.map_coords();
+//			
+		for (MoveDirection direction: MoveDirection.values()){
+			switch (direction) {
+			case VERTICAL:
+				for (int j = 1; j <= 8; j++) {
+					if(	brd[temp.y][j]!=' ')
+						dist++;
+				}
+
+				return dist;
+
+			case h:
+				for(int j=0;j<8;j++){
+					if(	brd[j][temp.x]!=' ')
+						dist++;
+				}
+				return dist;
+			case dl:// "\"
+				int x=temp.y;
+				int y=temp.x;
+				x--;
+				y--;
+
+				//check upper-left corner
+				while(!out_of_boundary(x,y)){
+					if((brd[y][x]!=' '))
+						dist++;
+					x--;
+					y--;
+				}
+				x=temp.y;
+				y=temp.x;
+				x++;
+				y++;
+				//check down-right corner
+				while(!out_of_boundary(x,y)){
+					if((brd[y][x]!=' '))
+						dist++;
+					x++;
+					y++;
+				}
+				return (++dist);//remember to count the pawn (itself)!!
+			case dr:// "/"
+				int x2=temp.y;
+				int y2=temp.x;
+				x2++;
+				y2++;
+
+				//check upper-right corner
+				while(!out_of_boundary(x2,y2)){
+					if((brd[y2][x2]!=' '))
+						dist++;
+					x2++;
+					y2++;
+				}
+				x2=temp.y;
+				y2=temp.x;
+				x2--;
+				y2--;
+				//check down-left corner
+				while(!out_of_boundary(x2,y2)){
+					if((brd[y2][x2]!=' '))
+						dist++;
+					x2--;
+					y2--;
+				}
+				return (++dist);//remember to count the pawn!!
+				return 0;
+			default :
+				return 0;
+			}
+		}
 		return new ArrayList<Marker>();
-		// TODO metoda od fera
 	}
 
 	public static boolean checkMove(Coordinates pole, Pawn pawn) {

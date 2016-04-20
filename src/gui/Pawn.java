@@ -18,13 +18,15 @@ public class Pawn extends JComponent {
 	private static final long serialVersionUID = 1L;
 	private final Image image;
 	private boolean pressed;
+	private int gameFinishedDefaultNumber;
+	private int gameFinishedCurrentNumber;
 	private int xPos;
 	private int yPos;
-	private PlayerColor kolor;
+	private PlayerColor color;
 
 	public Pawn(PlayerColor kolor) {
 		super();
-		setKolor(kolor);
+		setColor(kolor);
 		if (kolor == PlayerColor.RED) {
 			image = new ImageIcon(RED_PATH).getImage();
 		} else {
@@ -84,11 +86,27 @@ public class Pawn extends JComponent {
 	}
 
 	public PlayerColor getColor() {
-		return kolor;
+		return color;
 	}
 
-	public void setKolor(PlayerColor kolor) {
-		this.kolor = kolor;
+	public void setColor(PlayerColor color) {
+		this.color = color;
+	}
+
+	public int getGameFinishedDefaultNumber() {
+		return gameFinishedDefaultNumber;
+	}
+
+	public void setGameFinishedDefaultNumber(int gameFinishedDefaultNumber) {
+		this.gameFinishedDefaultNumber = gameFinishedDefaultNumber;
+	}
+
+	public int getGameFinishedCurrentNumber() {
+		return gameFinishedCurrentNumber;
+	}
+
+	public void setGameFinishedCurrentNumber(int gameFinishedCurrentNumber) {
+		this.gameFinishedCurrentNumber = gameFinishedCurrentNumber;
 	}
 
 }
