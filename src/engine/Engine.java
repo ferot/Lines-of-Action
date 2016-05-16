@@ -99,19 +99,20 @@ public final class Engine {
 		if (reds.size() <= 1)
 			return;
 		List<Pawn> tempList = null;
-		for (Pawn pawn : whites) {
+		List<Pawn> iterate = turn == PlayerColor.RED ? reds : whites;
+		for (Pawn pawn : iterate) {
 			tempList = getNeighbours(pawn);
 			if (tempList.size() > 0) {
 				for (Pawn pawns : tempList) {
 					updateListNumber(pawns.getCurrentNumber(),
-							pawn.getCurrentNumber(), whites);
+							pawn.getCurrentNumber(), iterate);
 				}
 			}
 		}
 		boolean finished = true;
 		int temp=-1;
 		int i =0;
-		for (Pawn pawn: whites){
+		for (Pawn pawn : iterate) {
 			if (i==0){
 				temp = pawn.getCurrentNumber();
 				i++;
@@ -123,11 +124,10 @@ public final class Engine {
 			}
 		}
 		if (finished) {
-			System.out.println("finished= " + finished);
-			// } else {
-			// resetPawnsNumber(whites);
+			System.out.println("finished= " + finished + ": " + turn);
+		} else {
+			resetPawnsNumber(iterate);
 		}
-		resetPawnsNumber(whites);
 
 	}
 
@@ -142,10 +142,8 @@ public final class Engine {
 
 	private static void resetPawnsNumber(List<Pawn> color) {
 		for (Pawn pawn : color) {
-			System.out.println(pawn.getCurrentNumber());
 			pawn.setCurrentNumber(pawn.getId());
 		}
-		System.out.println("**************************\n");
 	}
 
 	public static void changeTurn() {

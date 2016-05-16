@@ -66,8 +66,8 @@ public class Board extends JPanel {
 					if (Engine.checkMove(field, pawn)) {
 						Engine.move(pawn, field);
 						Engine.removeMarkers(pawn);
-						Engine.changeTurn();
 						Engine.checkGameFinished();
+						Engine.changeTurn();
 						Board.this.repaint();
 						return;
 					 }
