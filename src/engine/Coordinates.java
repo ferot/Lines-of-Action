@@ -2,6 +2,14 @@ package engine;
 
 public class Coordinates {
 
+	@Override
+	public boolean equals(Object obj) {
+		Coordinates cords = (Coordinates) obj;
+		if (this.x == cords.getX() && this.y == cords.getY())
+			return true;
+		return false;
+	}
+
 	private int x;
 	private int y;
 
@@ -30,4 +38,5 @@ public class Coordinates {
 	public void setY(int y) {
 		this.y = y;
 	}
+
 }
