@@ -27,21 +27,22 @@ void Automat::move_pawn(Point source,Point dest,Color col){
 		std::vector<Pawn>::iterator it;
 		if((it=std::find(PW->Pawns.begin(),PW->Pawns.end(),Item))!= PW->Pawns.end()){
 			*it=dest;
-				}
 		}
+	}
 	else if(col==black){
 		const Pawn Item(source);
-				std::vector<Pawn>::iterator it;
-				if((it=std::find(PB->Pawns.begin(),PB->Pawns.end(),Item))!= PB->Pawns.end()){
-					*it=dest;
-						}
-				}
+		std::vector<Pawn>::iterator it;
+		if((it=std::find(PB->Pawns.begin(),PB->Pawns.end(),Item))!= PB->Pawns.end()){
+			*it=dest;
+		}
 	}
+}
 
 
 
-Automat::Automat(Player *pw,Player *pb){
+Automat::Automat(Player *pw,Player *pb,Board* brd){
 	this->GAMESTATE=INIT;
+	BRD=brd;
 	PW=pw;
 	PB=pb;
 }
