@@ -22,6 +22,7 @@ public final class Engine {
 	private static List<Pawn> pawns;
 	private static PlayerColor turn;
 	private static List<Marker> marker;
+	private static boolean pressed;
 
 	// **********************************************************
 	// Inicjalizacja silnika
@@ -40,6 +41,7 @@ public final class Engine {
 		pawns.addAll(reds);
 		turn = PlayerColor.RED;
 		marker = new ArrayList<Marker>();
+		pressed = false;
 
 	}
 
@@ -50,12 +52,33 @@ public final class Engine {
 	public static boolean checkPawnClicked(Coordinates field) {
 		Pawn pawn = getPawn(field);
 		if (pawn != null && pawn.getColor() == turn) {
-			pawn.setPressed(true);
-			marker.add(new Marker(pawn, field));
-			marker.addAll(getPossibleMoves(pawn));
-			return true;
+			if (pressed && pawn.getColor() == turn) {
+				Pawn pressedPawn = getPressedPawn();
+				pressedPawn.setPressed(false);
+				removeMarkers(pressedPawn);
+				pawn.setPressed(true);
+				pressed = true;
+				marker.add(new Marker(pawn, field));
+				marker.addAll(getPossibleMoves(pawn));
+				return true;
+			} else if (!pressed) {
+				pawn.setPressed(true);
+				pressed = true;
+				marker.add(new Marker(pawn, field));
+				marker.addAll(getPossibleMoves(pawn));
+				return true;
 			}
+		}
 		return false;
+	}
+
+	private static Pawn getPressedPawn() {
+		for (Pawn pawn : pawns) {
+			if (pawn.isPressed()) {
+				return pawn;
+			}
+		}
+		return null;
 	}
 
 	private static Pawn getPawn(Coordinates field) {
@@ -307,7 +330,12 @@ public final class Engine {
 	}
 
 	public static boolean checkMove(Coordinates pole, Pawn pawn) {
-		System.out.println(pole.getX());
+		if (pawn.getxPos() == pole.getX() && pawn.getyPos() == pole.getY()) {
+			pawn.setPressed(false);
+			pressed = false;
+			removeMarkers(pawn);
+			return false;
+		}
 		for (Marker mark : marker) {
 			if (mark.getField().equals(pole)) {
 				return true;
@@ -342,6 +370,7 @@ public final class Engine {
 		pawn.setxPos(pole.getX());
 		pawn.setyPos(pole.getY());
 		pawn.setPressed(false);
+		pressed = false;
 		drawBoard();
 	}
 
