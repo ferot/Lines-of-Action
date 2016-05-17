@@ -1,6 +1,7 @@
 package engine;
 
 public class Coordinates {
+
 	private static final int _A = 65;
 	@Override
 	public boolean equals(Object obj) {
@@ -22,11 +23,13 @@ public class Coordinates {
 		this.setX(x);
 		this.setY(y);
 	}
-	//Map coords to A-H/1-8 system
-	public void map_coords(){
-		 this.x = this.x - _A;
-		 this.y = 8 - this.y;
+
+	// Map coords to A-H/1-8 system
+	public void map_coords() {
+		this.x = this.x - _A;
+		this.y = 8 - this.y;
 	}
+
 	public int getX() {
 		return x;
 	}

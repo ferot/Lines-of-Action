@@ -18,13 +18,13 @@ public class Pawn extends JComponent {
 	private static final long serialVersionUID = 1L;
 	private final Image image;
 	private boolean pressed;
-	private int gameFinishedDefaultNumber;
-	private int gameFinishedCurrentNumber;
 	private int xPos;
 	private int yPos;
+	private int id;
+	private int currentNumber;
 	private PlayerColor color;
 
-	public Pawn(PlayerColor kolor) {
+	public Pawn(PlayerColor kolor, int i) {
 		super();
 		setColor(kolor);
 		if (kolor == PlayerColor.RED) {
@@ -32,6 +32,8 @@ public class Pawn extends JComponent {
 		} else {
 			image = new ImageIcon(WHITE_PATH).getImage();
 		}
+		id = i;
+		currentNumber = i;
 		xPos = 0;
 		yPos = 0;
 		pressed = false;
@@ -93,20 +95,20 @@ public class Pawn extends JComponent {
 		this.color = color;
 	}
 
-	public int getGameFinishedDefaultNumber() {
-		return gameFinishedDefaultNumber;
+	public int getId() {
+		return id;
 	}
 
-	public void setGameFinishedDefaultNumber(int gameFinishedDefaultNumber) {
-		this.gameFinishedDefaultNumber = gameFinishedDefaultNumber;
+	public void setId(int id) {
+		this.id = id;
 	}
 
-	public int getGameFinishedCurrentNumber() {
-		return gameFinishedCurrentNumber;
+	public int getCurrentNumber() {
+		return currentNumber;
 	}
 
-	public void setGameFinishedCurrentNumber(int gameFinishedCurrentNumber) {
-		this.gameFinishedCurrentNumber = gameFinishedCurrentNumber;
+	public void setCurrentNumber(int currentNumber) {
+		this.currentNumber = currentNumber;
 	}
 
 }
