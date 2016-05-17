@@ -12,8 +12,6 @@ public class Marker extends JComponent {
 
 	private static final String MARKER_PATH = "images/marker.png";
 	private static final long serialVersionUID = 1L;
-	private static final int _H = 72;
-	private static final int _A = 65;
 	private Pawn markedPawn;
 	private Coordinates field;
 	private static Image image = new ImageIcon(MARKER_PATH).getImage();
@@ -58,11 +56,12 @@ public class Marker extends JComponent {
 	}
 
 	public void paintComponent(Graphics g) {
-		if (field.getX() >= _A && field.getX() <= _H && field.getY() >= 1
-				&& field.getY() <= 8) {
+		if (field.getX() >= 0 && field.getX() <= 7 && field.getY() >= 0
+				&& field.getY() <= 7) {
 			g.drawImage(image,
-					Chessboard.getChessboardFields()[field.getX() - _A][8 - field.getY()].getX(),
-					Chessboard.getChessboardFields()[field.getX() - _A][8 - field.getY()].getY(),
+					Chessboard.getChessboardFields()[field.getX()][field.getY()]
+							.getX(), Chessboard.getChessboardFields()[field
+							.getX()][field.getY()].getY(),
 					null);
 		} else {
 			System.out.println("Nieprawid³owe wspó³rzêdne: [" + field.getX()

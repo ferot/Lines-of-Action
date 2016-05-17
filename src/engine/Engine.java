@@ -14,7 +14,6 @@ public final class Engine {
 	private Engine() {
 	}
 
-	private static final int _A = 65;
 	private static final int AMOUNT_OF_PAWNS = 12;
 	private static char[][] brd;
 	private static List<Pawn> whites;
@@ -22,6 +21,7 @@ public final class Engine {
 	private static List<Pawn> pawns;
 	private static PlayerColor turn;
 	private static List<Marker> marker;
+	private static boolean pressed;
 
 	// **********************************************************
 	// Inicjalizacja silnika
@@ -40,6 +40,7 @@ public final class Engine {
 		pawns.addAll(reds);
 		turn = PlayerColor.RED;
 		marker = new ArrayList<Marker>();
+		pressed = false;
 
 	}
 
@@ -50,12 +51,33 @@ public final class Engine {
 	public static boolean checkPawnClicked(Coordinates field) {
 		Pawn pawn = getPawn(field);
 		if (pawn != null && pawn.getColor() == turn) {
-			pawn.setPressed(true);
-			marker.add(new Marker(pawn, field));
-			marker.addAll(getPossibleMoves(pawn));
-			return true;
+			if (pressed && pawn.getColor() == turn) {
+				Pawn pressedPawn = getPressedPawn();
+				pressedPawn.setPressed(false);
+				removeMarkers(pressedPawn);
+				pawn.setPressed(true);
+				pressed = true;
+				marker.add(new Marker(pawn, field));
+				marker.addAll(getPossibleMoves(pawn));
+				return true;
+			} else if (!pressed) {
+				pawn.setPressed(true);
+				pressed = true;
+				marker.add(new Marker(pawn, field));
+				marker.addAll(getPossibleMoves(pawn));
+				return true;
+			}
 		}
 		return false;
+	}
+
+	private static Pawn getPressedPawn() {
+		for (Pawn pawn : pawns) {
+			if (pawn.isPressed()) {
+				return pawn;
+			}
+		}
+		return null;
 	}
 
 	private static Pawn getPawn(Coordinates field) {
@@ -70,8 +92,8 @@ public final class Engine {
 
 	private static List<Pawn> getNeighbours(Pawn pawn) {
 		List<Pawn> temp = new ArrayList<>();
-		int x = pawn.getxPos() - _A;
-		int y = 8 - pawn.getyPos();
+		int x = pawn.getxPos();
+		int y = pawn.getyPos();
 		char c = pawn.getColor() == PlayerColor.RED ? 'r' : 'w';
 		for (int i = -1; i <= 1; i++) {
 			if (x + i < 0 || x + i > 7) {
@@ -82,7 +104,7 @@ public final class Engine {
 					continue;
 				}
 				if (brd[x+i][y+j] == c && (i != 0 || j != 0)) {
-					Pawn a = getPawn(new Coordinates(_A + x + i, 8 - y - j));
+					Pawn a = getPawn(new Coordinates(x + i, y + j));
 					if (a != null) {
 						temp.add(a);
 					}
@@ -157,7 +179,6 @@ public final class Engine {
 		// short int dist=0;
 
 		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
-		c.map_coords();
 		for (MoveDirection direction : MoveDirection.values()) {
 			int dist = 0;
 			switch (direction) {
@@ -170,69 +191,69 @@ public final class Engine {
 				System.out.println("vertical" + dist);
 				checkAndMarkVertical(pion, dist);
 				break;
-				// return dist;
-				//
-				// case h:
-				// for (int j = 0; j < 8; j++) {
-				// if (brd[j][temp.x] != ' ')
-				// dist++;
-				// }
-				// return dist;
-				// case dl:// "\"
-				// int x = temp.y;
-				// int y = temp.x;
-				// x--;
-				// y--;
-				//
-				// // check upper-left corner
-				// while (!out_of_boundary(x, y)) {
-				// if ((brd[y][x] != ' '))
-				// dist++;
-				// x--;
-				// y--;
-				// }
-				// x = temp.y;
-				// y = temp.x;
-				// x++;
-				// y++;
-				// // check down-right corner
-				// while (!out_of_boundary(x, y)) {
-				// if ((brd[y][x] != ' '))
-				// dist++;
-				// x++;
-				// y++;
-				// }
-				// return (++dist);// remember to count the pawn (itself)!!
-				// case dr:// "/"
-				// int x2 = temp.y;
-				// int y2 = temp.x;
-				// x2++;
-				// y2++;
-				//
-				// // check upper-right corner
-				// while (!out_of_boundary(x2, y2)) {
-				// if ((brd[y2][x2] != ' '))
-				// dist++;
-				// x2++;
-				// y2++;
-				// }
-				// x2 = temp.y;
-				// y2 = temp.x;
-				// x2--;
-				// y2--;
-				// // check down-left corner
-				// while (!out_of_boundary(x2, y2)) {
-				// if ((brd[y2][x2] != ' '))
-				// dist++;
-				// x2--;
-				// y2--;
-				// }
-				// return (++dist);// remember to count the pawn!!
-				// return 0;
-				// default:
-				// return 0;
-				// }
-				// }
+			// return dist;
+			//
+			// case h:
+			// for (int j = 0; j < 8; j++) {
+			// if (brd[j][temp.x] != ' ')
+			// dist++;
+			// }
+			// return dist;
+			// case dl:// "\"
+			// int x = temp.y;
+			// int y = temp.x;
+			// x--;
+			// y--;
+			//
+			// // check upper-left corner
+			// while (!out_of_boundary(x, y)) {
+			// if ((brd[y][x] != ' '))
+			// dist++;
+			// x--;
+			// y--;
+			// }
+			// x = temp.y;
+			// y = temp.x;
+			// x++;
+			// y++;
+			// // check down-right corner
+			// while (!out_of_boundary(x, y)) {
+			// if ((brd[y][x] != ' '))
+			// dist++;
+			// x++;
+			// y++;
+			// }
+			// return (++dist);// remember to count the pawn (itself)!!
+			// case dr:// "/"
+			// int x2 = temp.y;
+			// int y2 = temp.x;
+			// x2++;
+			// y2++;
+			//
+			// // check upper-right corner
+			// while (!out_of_boundary(x2, y2)) {
+			// if ((brd[y2][x2] != ' '))
+			// dist++;
+			// x2++;
+			// y2++;
+			// }
+			// x2 = temp.y;
+			// y2 = temp.x;
+			// x2--;
+			// y2--;
+			// // check down-left corner
+			// while (!out_of_boundary(x2, y2)) {
+			// if ((brd[y2][x2] != ' '))
+			// dist++;
+			// x2--;
+			// y2--;
+			// }
+			// return (++dist);// remember to count the pawn!!
+			// return 0;
+			// default:
+			// return 0;
+			// }
+			// }
 			case DOWN_LEFT:
 
 				int x2 = c.getX();
@@ -260,7 +281,7 @@ public final class Engine {
 				}
 				dist++;// remember to count the pawn (itself)!!
 				System.out.println("down left" + dist);
-				checkAndMarkDownLeft(pion, dist);
+				// checkAndMarkDownRight(pion, dist);
 				break;
 			case DOWN_RIGHT:
 				int x = c.getX();
@@ -307,7 +328,12 @@ public final class Engine {
 	}
 
 	public static boolean checkMove(Coordinates pole, Pawn pawn) {
-		System.out.println(pole.getX());
+		if (pawn.getxPos() == pole.getX() && pawn.getyPos() == pole.getY()) {
+			pawn.setPressed(false);
+			pressed = false;
+			removeMarkers(pawn);
+			return false;
+		}
 		for (Marker mark : marker) {
 			if (mark.getField().equals(pole)) {
 				return true;
@@ -336,13 +362,13 @@ public final class Engine {
 	}
 
 	public static void move(Pawn pawn, Coordinates pole) {
-		brd[8 - pawn.getyPos()][-_A + pawn.getxPos()] = ' ';
-		brd[8 - pole.getY()][-_A + pole.getX()] = pawn.getColor() == PlayerColor.RED ? 'r'
+		brd[pawn.getyPos()][pawn.getxPos()] = ' ';
+		brd[pole.getY()][pole.getX()] = pawn.getColor() == PlayerColor.RED ? 'r'
 				: 'w';
-		System.out.println(pole.getX()+" " +pole.getY());
 		pawn.setxPos(pole.getX());
 		pawn.setyPos(pole.getY());
 		pawn.setPressed(false);
+		pressed = false;
 		drawBoard();
 	}
 
@@ -351,46 +377,26 @@ public final class Engine {
 	// ********************************************************************************
 
 	private static void checkAndMarkVertical(Pawn pion, int dist) {
-		int x = pion.getxPos() - _A;
-		int y = 8 - pion.getyPos();
+		int x = pion.getxPos();
+		int y = pion.getyPos();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
 		if (y - dist >= 0 && y - dist < 8) {
 			if (brd[y - dist][x] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos(), // Tutaj
-						// ten
-						// plus
-						// jest
-						// ok
-						// bo
-						// pozniej
-						// jest
-						// odejmowane
-						// przy
-						// rysowaniu
-						pion.getyPos() + dist)));
+				marker.add(new Marker(pion, new Coordinates(pion.getxPos(),
+						pion.getyPos() - dist)));
 			}
 		}
 		if (y + dist >= 0 && y + dist < 8) {
 			if (brd[y + dist][x] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos(), // Tutaj
-						// ten
-						// minus
-						// jest
-						// ok
-						// bo
-						// pozniej
-						// jest
-						// odejmowane
-						// przy
-						// rysowaniu
-						pion.getyPos() - dist)));
+				marker.add(new Marker(pion, new Coordinates(pion.getxPos(),
+						pion.getyPos() + dist)));
 			}
 		}
 	}
 
 	private static void checkAndMarkHorizontal(Pawn pion, int dist) {
-		int x = pion.getxPos() - _A;
-		int y = 8 - pion.getyPos();
+		int x = pion.getxPos();
+		int y = pion.getyPos();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
 		if (x - dist >= 0 && x - dist < 8) {
 			if (brd[y][x - dist] != col) {
@@ -409,41 +415,18 @@ public final class Engine {
 	private static void checkAndMarkDownRight(Pawn pion, int dist) {
 		// TODO: handle marker
 		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
-		c.map_coords();
-		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
-		int x = c.getX();
-		int y = c.getY();
-		if ((x - dist >= 0 && x - dist < 8) && (y + dist >= 0 && y + dist < 8)) {
-			if (brd[y + dist][x - dist] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						- dist, pion.getyPos() - dist)));
-			}
-		}
-		if ((x - dist >= 0 && x - dist < 8) && (y - dist >= 0 && y - dist < 8)) {
-			if (brd[y - dist][x - dist] !=col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						+ dist, pion.getyPos() + dist)));
-				System.out.println();
-			}
-		}
-	}
-	private static void checkAndMarkDownLeft(Pawn pion, int dist) {
-		// TODO: handle marker
-		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
-		c.map_coords();
-		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
 		int x = c.getX();
 		int y = c.getY();
 		if ((x + dist >= 0 && x + dist < 8) && (y + dist >= 0 && y + dist < 8)) {
-			if (brd[y + dist][x + dist] != col) {
+			if (brd[y + dist][x + dist] == ' ') {
 				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						- dist, pion.getyPos() + dist)));
+						+ dist, pion.getyPos() + dist)));
 			}
 		}
 		if ((x - dist >= 0 && x - dist < 8) && (y - dist >= 0 && y - dist < 8)) {
-			if (brd[y - dist][x - dist] !=col) {
+			if (brd[y - dist][x - dist] == ' ') {
 				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						+ dist, pion.getyPos() - dist)));
+						- dist, pion.getyPos() - dist)));
 				System.out.println();
 			}
 		}
@@ -455,22 +438,22 @@ public final class Engine {
 			if (color == PlayerColor.WHITE) {
 				if (i < AMOUNT_OF_PAWNS / 2) {
 					brd[i + 1][0] = 'w';
-					pawn.setxPos(_A + 0);
-					pawn.setyPos(i + 2);
+					pawn.setxPos(0);
+					pawn.setyPos(i + 1);
 				} else {
 					brd[i - 5][7] = 'w';
-					pawn.setxPos(7 + _A);
-					pawn.setyPos(i - 4);
+					pawn.setxPos(7);
+					pawn.setyPos(i - 5);
 				}
 			} else if (color == PlayerColor.RED) {
 				if (i < AMOUNT_OF_PAWNS / 2) {
 					brd[0][i + 1] = 'r';
-					pawn.setxPos(i + 1 + _A);
-					pawn.setyPos(1);
+					pawn.setxPos(i + 1);
+					pawn.setyPos(0);
 				} else {
 					brd[7][i - 5] = 'r';
-					pawn.setxPos(i - 5 + _A);
-					pawn.setyPos(8);
+					pawn.setxPos(i - 5);
+					pawn.setyPos(7);
 				}
 			}
 			i++;
@@ -495,7 +478,7 @@ public final class Engine {
 	public static void drawBoard() {
 		System.out.println(" -------------------------");
 		for (int i = 0; i < 8; i++) {
-			System.out.print(8 - i);
+			System.out.print(i);
 			System.out.print("|");
 			for (int j = 0; j < 8; j++) {
 				System.out.print(brd[i][j] + " |");

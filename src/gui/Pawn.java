@@ -13,8 +13,6 @@ public class Pawn extends JComponent {
 
 	private static final String WHITE_PATH = "images/bialy.png";
 	private static final String RED_PATH = "images/czerwony.png";
-	private static final int _H = 72;
-	private static final int _A = 65;
 	private static final long serialVersionUID = 1L;
 	private final Image image;
 	private boolean pressed;
@@ -48,10 +46,10 @@ public class Pawn extends JComponent {
 	}
 
 	public void paintComponent(Graphics g) {
-		if (xPos >= _A && xPos <= _H && yPos >= 1 && yPos <= 8) {
+		if (xPos >= 0 && xPos <= 7 && yPos >= 0 && yPos <= 7) {
 			g.drawImage(image,
-					Chessboard.getChessboardFields()[xPos - _A][8 - yPos].getX(),
-					Chessboard.getChessboardFields()[xPos - _A][8 - yPos].getY(),
+					Chessboard.getChessboardFields()[xPos][yPos].getX(),
+					Chessboard.getChessboardFields()[xPos][yPos].getY(),
 					null);
 		} else {
 			System.out.println("Nieprawid³owe wspó³rzêdne: [" + xPos + ", "

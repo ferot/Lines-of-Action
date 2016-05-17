@@ -16,7 +16,6 @@ public class Board extends JPanel {
 
 	private static final int FRAME_SIZE = 22;
 	private static final long serialVersionUID = 1L;
-	private static final int _A = 65;
 	private static final int WIDTH = Chessboard.getChessboard().getIconWidth();
 	private static final int HEIGHT = Chessboard.getChessboard().getIconWidth();
 	private static final int FIELD_1_X = 12;
@@ -57,8 +56,8 @@ public class Board extends JPanel {
 		return new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				Coordinates field = translateClickToBoardField(e.getX(), e.getY());
-				if (field.getX()<_A || field.getX() >= _A +8 || 
-						field.getY()<=0 || field.getY() >8){
+				if (field.getX() < 0 || field.getX() >= 8 || field.getY() < 0
+						|| field.getY() >= 8) {
 					return;
 				}
 				Pawn pawn = Engine.checkPressed();
@@ -80,13 +79,13 @@ public class Board extends JPanel {
 				int xx = 0, yy = 0;
 				for (int i = 0; i < 8; i++){
 					if (x >= (FIELD_1_X + i * fieldXSize) && x <= (FIELD_1_X + (i+1)*fieldXSize)){
-						xx = _A + i;
+						xx = i;
 						break;
 					}
 				}
 				for (int i = 0; i < 8; i++) {
 					if (y >= (FIELD_1_Y- i* fieldYSize ) && y <= (FIELD_1_Y - (i-1) * fieldYSize)) {
-						yy = i + 1;
+						yy = 7 - i;
 						break;
 					}
 				}
