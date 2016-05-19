@@ -2,12 +2,15 @@ package engine;
 
 import enums.MoveDirection;
 import enums.PlayerColor;
+import gui.Board;
 import gui.Marker;
 import gui.Pawn;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+
+import bot.Bot;
+import bot.TreeNodeContent;
 
 public final class Engine {
 
@@ -22,12 +25,18 @@ public final class Engine {
 	private static PlayerColor turn;
 	private static List<Marker> marker;
 	private static boolean pressed;
+	private static Bot bot;
+	private static boolean[] jump_flags = new boolean[8];
 
 	// **********************************************************
 	// Inicjalizacja silnika
 	// **********************************************************
 
 	static {
+		init();
+	}
+
+	public static void init() {
 		whites = new ArrayList<Pawn>();
 		reds = new ArrayList<Pawn>();
 		initBoard();
@@ -41,7 +50,7 @@ public final class Engine {
 		turn = PlayerColor.RED;
 		marker = new ArrayList<Marker>();
 		pressed = false;
-
+		bot = new Bot(PlayerColor.WHITE);
 	}
 
 	// **********************************************************
@@ -58,13 +67,13 @@ public final class Engine {
 				pawn.setPressed(true);
 				pressed = true;
 				marker.add(new Marker(pawn, field));
-				marker.addAll(getPossibleMoves(pawn));
+				getPossibleMoves(pawn, true);
 				return true;
 			} else if (!pressed) {
 				pawn.setPressed(true);
 				pressed = true;
 				marker.add(new Marker(pawn, field));
-				marker.addAll(getPossibleMoves(pawn));
+				getPossibleMoves(pawn, true);
 				return true;
 			}
 		}
@@ -80,7 +89,7 @@ public final class Engine {
 		return null;
 	}
 
-	private static Pawn getPawn(Coordinates field) {
+	public static Pawn getPawn(Coordinates field) {
 		for (Pawn pawn : pawns) {
 			if (pawn.getxPos() == field.getX()
 					&& pawn.getyPos() == field.getY()) {
@@ -103,7 +112,7 @@ public final class Engine {
 				if (y + j < 0 || y + j > 7) {
 					continue;
 				}
-				if (brd[x+i][y+j] == c && (i != 0 || j != 0)) {
+				if (brd[y + j][x + i] == c && (i != 0 || j != 0)) {
 					Pawn a = getPawn(new Coordinates(x + i, y + j));
 					if (a != null) {
 						temp.add(a);
@@ -115,11 +124,16 @@ public final class Engine {
 	}
 
 	public static boolean checkGameFinished() {
-		// TODO Obsluga wystąpienia zdarzenia tam gdzie return
-		if (whites.size() <= 1)
+		if (whites.size() <= 1) {
+			Board.setWinner(PlayerColor.WHITE);
+			Board.setGameFinished(true);
 			return true;
-		if (reds.size() <= 1)
+		}
+		if (reds.size() <= 1) {
+			Board.setWinner(PlayerColor.WHITE);
+			Board.setGameFinished(true);
 			return true;
+		}
 		List<Pawn> tempList = null;
 		List<Pawn> iterate = turn == PlayerColor.RED ? reds : whites;
 		for (Pawn pawn : iterate) {
@@ -132,21 +146,22 @@ public final class Engine {
 			}
 		}
 		boolean finished = true;
-		int temp=-1;
-		int i =0;
+		int temp = -1;
+		int i = 0;
 		for (Pawn pawn : iterate) {
-			if (i==0){
+			if (i == 0) {
 				temp = pawn.getCurrentNumber();
 				i++;
-			}else{
-				if(pawn.getCurrentNumber() != temp){
+			} else {
+				if (pawn.getCurrentNumber() != temp) {
 					finished = false;
 					break;
 				}
 			}
 		}
 		if (finished) {
-			System.out.println("finished= " + finished + ": " + turn);
+			Board.setWinner(turn);
+			Board.setGameFinished(true);
 			return true;
 		} else {
 			resetPawnsNumber(iterate);
@@ -155,13 +170,13 @@ public final class Engine {
 
 	}
 
-	private static void updateListNumber(int currentNumber, int currentNumber2,
+	private static void updateListNumber(int currentNumber, int current,
 			List<Pawn> color) {
 		for (Pawn pawn : color) {
-			pawn.setCurrentNumber(pawn.getCurrentNumber() == currentNumber ? currentNumber2
-					: pawn.getCurrentNumber());
+			if(pawn.getCurrentNumber() == currentNumber){
+				pawn.setCurrentNumber(current);
+			}
 		}
-
 	}
 
 	private static void resetPawnsNumber(List<Pawn> color) {
@@ -172,12 +187,14 @@ public final class Engine {
 
 	public static void changeTurn() {
 		turn = (turn == PlayerColor.WHITE ? PlayerColor.RED : PlayerColor.WHITE);
+		if (turn == bot.getColor()){
+			bot.move(whites, reds);
+		}
 	}
 
-	public static Collection<? extends Marker> getPossibleMoves(Pawn pion) {
-		// short int Board::count_move(Pawn A,Dist_type type){
-		// short int dist=0;
-
+	public static List<TreeNodeContent> getPossibleMoves(Pawn pion,
+			boolean markingOn) {
+		List<TreeNodeContent> moveList = new ArrayList<TreeNodeContent>();
 		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
 		for (MoveDirection direction : MoveDirection.values()) {
 			int dist = 0;
@@ -188,14 +205,12 @@ public final class Engine {
 					if (brd[j][c.getX()] != ' ')
 						dist++;
 				}
-				System.out.println("vertical" + dist);
-				checkAndMarkVertical(pion, dist);
+				checkAndMarkVertical(pion, dist, moveList, markingOn);
 				break;
 			case DOWN_LEFT:
 
 				int x2 = c.getX();
 				int y2 = c.getY();
-				System.out.println(x2+" "+ y2);
 				x2++;
 				y2--;
 
@@ -218,8 +233,7 @@ public final class Engine {
 					y2++;
 				}
 				dist++;// remember to count the pawn (itself)!!
-				System.out.println("down left" + dist);
-				checkAndMarkDownLeft(pion, dist);
+				checkAndMarkDownLeft(pion, dist, moveList, markingOn);
 				break;
 			case DOWN_RIGHT:
 				int x = c.getX();
@@ -229,7 +243,7 @@ public final class Engine {
 
 				// check upper-left corner
 				while (!out_of_boundary(x, y)) {
-					if ((brd[y][x] != ' ')){
+					if ((brd[y][x] != ' ')) {
 						dist++;
 					}
 					x--;
@@ -247,8 +261,7 @@ public final class Engine {
 					y++;
 				}
 				dist++;// remember to count the pawn (itself)!!
-				System.out.println("down right" + dist);
-				checkAndMarkDownRight(pion, dist);
+				checkAndMarkDownRight(pion, dist, moveList, markingOn);
 				break;
 			case HORIZONTAL:
 				dist = 0;
@@ -256,14 +269,13 @@ public final class Engine {
 					if (brd[c.getY()][j] != ' ')
 						dist++;
 				}
-				System.out.println("horizontal" + dist);
-				checkAndMarkHorizontal(pion, dist);
+				checkAndMarkHorizontal(pion, dist, moveList, markingOn);
 				break;
 			default:
 				break;
 			}
 		}
-		return new ArrayList<Marker>();
+		return moveList;
 	}
 
 	public static boolean checkMove(Coordinates pole, Pawn pawn) {
@@ -320,92 +332,250 @@ public final class Engine {
 		pawn.setxPos(pole.getX());
 		pawn.setyPos(pole.getY());
 		pressed = false;
-		drawBoard();
+		// drawBoard();
 	}
 
 	// ********************************************************************************
 	// Metody prywatne
 	// ********************************************************************************
+	private static double countValue(Pawn pawn, Coordinates coordinates) {
+		double sum = 0;
+		if (pawn.getColor() == PlayerColor.RED) {
+			for (Pawn red : reds) {
+				if (red == pawn){
+					sum += getDistance(reds, coordinates);
+				}else{
+					sum += getDistance(reds, red);
+				}
+			}
+		}
+		if (pawn.getColor() == PlayerColor.WHITE) {
+			for (Pawn white : whites) {
+				if (white == pawn){
+					sum += getDistance(whites, coordinates);
+				}else{
+					sum += getDistance(whites, white);
+				}
+			}
+		}
+		return sum;
+	}
+	
+	private static double getDistance(List<Pawn> list,
+			Coordinates coordinates) {
+		int distance = 0;
+		for (Pawn element : list) {
+			distance += Math.sqrt(Math.abs(element.getxPos() -coordinates.getX())
+					+ Math.abs(element.getyPos() - coordinates.getY()));
+		}
+		return distance;
+	}
 
-	private static void checkAndMarkVertical(Pawn pion, int dist) {
+	private static int getDistance(List<Pawn> list, Pawn pawn) {
+		int distance = 0;
+		for (Pawn element : list) {
+			distance += Math.sqrt(Math.abs(element.getxPos() - pawn.getxPos())
+					+ Math.abs(element.getyPos() - pawn.getyPos()));
+		}
+		return distance;
+	}
+
+	private static void checkAndMarkVertical(Pawn pion, int dist,
+			List<TreeNodeContent> moveList, boolean markingOn) {
 		int x = pion.getxPos();
 		int y = pion.getyPos();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
+		char col_negated = col == 'r' ? 'w' : 'r';
 		if (y - dist >= 0 && y - dist < 8) {
+			for (int b = y - 1; (b >= y - dist + 1) && b < 8 && b >= 0; b--) {
+				if (brd[b][x] == col_negated) {
+					jump_flags[0] = true;
+					break;
+				}
+			}
 			if (brd[y - dist][x] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos(),
-						pion.getyPos() - dist)));
+				if (jump_flags[0] == false){
+					Coordinates coordinatesFrom = new Coordinates(pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos(), pion.getyPos() - dist);
+					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
+							countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[0] = false;
 			}
 		}
 		if (y + dist >= 0 && y + dist < 8) {
+			for (int b = y + 1; (b <= y + dist - 1) && b < 8 && b >= 0; b++) {
+				if (brd[b][x] == col_negated) {
+					jump_flags[1] = true;
+					break;
+				}
+			}
 			if (brd[y + dist][x] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos(),
-						pion.getyPos() + dist)));
+				if (jump_flags[1] == false){
+					Coordinates coordinatesFrom = new Coordinates(pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos(), pion.getyPos() + dist);
+					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
+							countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[1] = false;
 			}
 		}
 	}
 
-	private static void checkAndMarkHorizontal(Pawn pion, int dist) {
+
+	private static void checkAndMarkHorizontal(Pawn pion, int dist,
+			List<TreeNodeContent> moveList, boolean markingOn) {
 		int x = pion.getxPos();
 		int y = pion.getyPos();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
+		char col_negated = col == 'r' ? 'w' : 'r';
 		if (x - dist >= 0 && x - dist < 8) {
+			for (int b = x - 1; (b >= x - dist + 1) && b < 8 && b >= 0; b--) {
+				if (brd[y][b] == col_negated) {
+					jump_flags[2] = true;
+					break;
+				}
+			}
 			if (brd[y][x - dist] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						- dist, pion.getyPos())));
+				if (jump_flags[2] == false){
+					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()-dist, pion.getyPos());
+					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
+							countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[2] = false;
 			}
 		}
 		if (x + dist >= 0 && x + dist < 8) {
+			for (int b = x + 1; (b <= x + dist - 1) && b < 8 && b >= 0; b++) {
+				if (brd[y][b] == col_negated) {
+					jump_flags[3] = true;
+					break;
+				}
+			}
 			if (brd[y][x + dist] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						+ dist, pion.getyPos())));
+				if (jump_flags[3] == false){
+					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()+dist, pion.getyPos());
+					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
+							countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[3] = false;
 			}
 		}
 	}
 
-	private static void checkAndMarkDownRight(Pawn pion, int dist) {
-		// TODO: handle marker
+	private static void checkAndMarkDownRight(Pawn pion, int dist,
+			List<TreeNodeContent> moveList, boolean markingOn) {
 		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
 		int x = c.getX();
 		int y = c.getY();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
-
-
+		char col_negated = col == 'r' ? 'w' : 'r';
 		if ((x + dist >= 0 && x + dist < 8) && (y + dist >= 0 && y + dist < 8)) {
-			if (brd[y+dist][x + dist] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						+ dist, pion.getyPos() + dist)));
+			for (int a = y + 1, b = x + 1; (b <= x + dist - 1) && b < 8 && b >= 0 && (a <= y + dist - 1) && a >= 0 && a < 8; b++, a++) {
+				if (brd[a][b] == col_negated) {
+					jump_flags[4] = true;
+					break;
+				}
+			}
+			if (brd[y + dist][x + dist] != col) {
+				if (jump_flags[4] == false){
+					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()+dist, pion.getyPos()+dist);
+					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
+							countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[4] = false;
 			}
 		}
 		if ((x - dist >= 0 && x - dist < 8) && (y - dist >= 0 && y - dist < 8)) {
-			if (brd[y - dist][x - dist]!= col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						- dist, pion.getyPos() - dist)));
+			for (int a = y + 1, b = x + 1; (b >= x - dist + 1) && b < 8 && b >= 0 && (a >= y - dist + 1) && a >= 0 && a < 8; b--, a--) {
+				if (brd[a][b] == col_negated) {
+					jump_flags[5] = true;
+					break;
+				}
+			}
+			if (brd[y - dist][x - dist] != col) {
+				if (jump_flags[5] == false){
+					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()-dist, pion.getyPos()-dist);
+					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
+							countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[5] =false;
 			}
 		}
 	}
-	private static void checkAndMarkDownLeft(Pawn pion, int dist) {
-		// TODO: handle marker
+
+	private static void checkAndMarkDownLeft(Pawn pion, int dist,
+			List<TreeNodeContent> moveList, boolean markingOn) {
 		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
 		int x = c.getX();
 		int y = c.getY();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
-
-
+		char col_negated = col == 'r' ? 'w' : 'r';
 		if ((x + dist >= 0 && x + dist < 8) && (y - dist >= 0 && y - dist < 8)) {
-			if (brd[y-dist][x + dist] != col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						+ dist, pion.getyPos() -dist)));
+			for (int a = y - 1,b = x + 1; (b <= x + dist - 1) && b < 8 && b >= 0 && (a >= y - dist + 1) && a >= 0 && a < 8; b++, a--) {
+				if (brd[a][b] == col_negated) {
+					jump_flags[6] = true;
+					break;
+				}
+			}
+			if (brd[y - dist][x + dist] != col) {
+				if (jump_flags[6] == false){
+					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()+dist, pion.getyPos()-dist);
+					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
+							countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[6] = false;
 			}
 		}
 		if ((x - dist >= 0 && x - dist < 8) && (y + dist >= 0 && y + dist < 8)) {
-			if (brd[y + dist][x - dist]!= col) {
-				marker.add(new Marker(pion, new Coordinates(pion.getxPos()
-						- dist, pion.getyPos() + dist)));
+			for (int a = y + 1, b = x - 1; (b >= x - dist + 1) && b < 8 && b >= 0 && (a <= y + dist - 1) && a >= 0 && a < 8; b--, a++) {
+				if (brd[a][b] == col_negated) {
+					jump_flags[7] = true;
+					break;
+				}
+			}
+			if (brd[y + dist][x - dist] != col) {
+				if (jump_flags[7] == false) {
+					Coordinates coordinatesFrom = new Coordinates(
+							pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
+							- dist, pion.getyPos() + dist);
+					moveList.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, countValue(pion, coordinatesTo)));
+					if (markingOn) {
+						marker.add(new Marker(pion, coordinatesTo));
+					}
+				}
+				jump_flags[7] = false;
 			}
 		}
 	}
-
 
 	private static void placePawns(List<Pawn> list, PlayerColor color) {
 		int i = 0;
@@ -489,5 +659,10 @@ public final class Engine {
 	public static List<Marker> getMarker() {
 		return marker;
 	}
+
+	public static Bot getBot() {
+		return bot;
+	}
+
 
 }

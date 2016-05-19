@@ -13,7 +13,7 @@ public class Launcher extends JFrame {
 		super(GAME_NAME);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
-		board = new Board();
+		board = new Board(this);
 	}
 	private static final long serialVersionUID = 1L;
 
