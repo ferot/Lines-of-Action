@@ -11,7 +11,7 @@ public class Tree<T> {
 		root = new Node<T>();
 		maxDeep = deep;
 		root.data = rootData;
-		root.deep = 0;
+		root.value = 0;
 		root.parent = null;
 		root.children = new ArrayList<Node<T>>();
 	}
@@ -19,7 +19,7 @@ public class Tree<T> {
 	public void add(Node<T> parent, T data) {
 		Node<T> child = new Node<T>();
 		child.data = data;
-		child.deep = parent.deep + 1;
+		child.value = 0;
 		child.parent = parent;
 		child.children = new ArrayList<Node<T>>();
 		parent.children.add(child);
@@ -94,8 +94,8 @@ public class Tree<T> {
 		double max = -1;
 		Node<T> maxNode = new Node<T>();
 		for (Node<T> node : nodesAtDeep) {
-			if (((TreeNodeContent) node.data).getValue() > max) {
-				max = ((TreeNodeContent) node.data).getValue();
+			if (node.value > max) {
+				max = node.value;
 				maxNode = node;
 			}
 		}
@@ -106,8 +106,8 @@ public class Tree<T> {
 		double min = Integer.MAX_VALUE;
 		Node<T> minNode = new Node<T>();
 		for (Node<T> node : nodesAtDeep) {
-			if (((TreeNodeContent) node.data).getValue() < min) {
-				min = ((TreeNodeContent) node.data).getValue();
+			if ((node.value) < min) {
+				min = node.value;
 				minNode = node;
 			}
 		}
@@ -116,7 +116,7 @@ public class Tree<T> {
 
 	public static class Node<T> {
 		private T data;
-		private int deep;
+		private int value;
 		private Node<T> parent;
 		private List<Node<T>> children;
 
@@ -126,6 +126,22 @@ public class Tree<T> {
 
 		public void setData(T data) {
 			this.data = data;
+		}
+
+		public List<Node<T>> getChildren() {
+			return children;
+		}
+
+		public void setChildren(List<Node<T>> children) {
+			this.children = children;
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		public void setValue(int value) {
+			this.value = value;
 		}
 	}
 

@@ -4,17 +4,26 @@ import engine.Coordinates;
 
 public class TreeNodeContent {
 
+	private char brd[][];
 	private Coordinates from;
 	private Coordinates to;
-	private double value;
 	
-	public TreeNodeContent(){}
+	public TreeNodeContent() {
+		setBrd(new char[8][8]);
+	}
 	
+	public TreeNodeContent(Coordinates coordinates, Coordinates coordinates2,
+			char[][] board) {
+		from = coordinates;
+		to = coordinates2;
+		setBrd(board);
+	}
+
 	public TreeNodeContent(Coordinates coordinates, Coordinates coordinates2,
 			double countValue) {
 		from = coordinates;
 		to = coordinates2;
-		value = countValue;
+		setBrd(new char[8][8]);
 	}
 
 	public Coordinates getFrom() {
@@ -33,11 +42,11 @@ public class TreeNodeContent {
 		this.to = to;
 	}
 
-	public double getValue() {
-		return value;
+	public char[][] getBrd() {
+		return brd;
 	}
 
-	public void setValue(double value) {
-		this.value = value;
+	public void setBrd(char brd[][]) {
+		this.brd = brd;
 	}
 }

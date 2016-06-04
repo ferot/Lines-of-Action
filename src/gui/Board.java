@@ -51,6 +51,7 @@ public class Board extends JPanel {
 				repaint();
 				repainted = true;
 			} else {
+				repainted = false;
 				String message = winner == Engine.getBot().getColor() ? "Przegra³eœ! "
 						: "Wygra³eœ";
 				int a = JOptionPane.showOptionDialog(this, "Koniec gry",

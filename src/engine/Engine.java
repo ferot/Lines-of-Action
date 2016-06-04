@@ -188,7 +188,7 @@ public final class Engine {
 	public static void changeTurn() {
 		turn = (turn == PlayerColor.WHITE ? PlayerColor.RED : PlayerColor.WHITE);
 		if (turn == bot.getColor()){
-			bot.move(whites, reds);
+			bot.move(brd);
 		}
 	}
 
@@ -200,75 +200,19 @@ public final class Engine {
 			int dist = 0;
 			switch (direction) {
 			case VERTICAL:
-				dist = 0;
-				for (int j = 0; j <= 7; j++) {
-					if (brd[j][c.getX()] != ' ')
-						dist++;
-				}
+				dist = checkVertical(c, dist);
 				checkAndMarkVertical(pion, dist, moveList, markingOn);
 				break;
 			case DOWN_LEFT:
-
-				int x2 = c.getX();
-				int y2 = c.getY();
-				x2++;
-				y2--;
-
-				// check upper-right corner
-				while (!out_of_boundary(x2, y2)) {
-					if ((brd[y2][x2] != ' '))
-						dist++;
-					x2++;
-					y2--;
-				}
-				x2 = c.getX();
-				y2 = c.getY();
-				x2--;
-				y2++;
-				// check down-left corner
-				while (!out_of_boundary(x2, y2)) {
-					if ((brd[y2][x2] != ' '))
-						dist++;
-					x2--;
-					y2++;
-				}
-				dist++;// remember to count the pawn (itself)!!
+				dist = checkDownLeft(c, dist);
 				checkAndMarkDownLeft(pion, dist, moveList, markingOn);
 				break;
 			case DOWN_RIGHT:
-				int x = c.getX();
-				int y = c.getY();
-				x--;
-				y--;
-
-				// check upper-left corner
-				while (!out_of_boundary(x, y)) {
-					if ((brd[y][x] != ' ')) {
-						dist++;
-					}
-					x--;
-					y--;
-				}
-				x = c.getX();
-				y = c.getY();
-				x++;
-				y++;
-				// check down-right corner
-				while (!out_of_boundary(x, y)) {
-					if ((brd[y][x] != ' '))
-						dist++;
-					x++;
-					y++;
-				}
-				dist++;// remember to count the pawn (itself)!!
+				dist = checkDownRight(c, dist);
 				checkAndMarkDownRight(pion, dist, moveList, markingOn);
 				break;
 			case HORIZONTAL:
-				dist = 0;
-				for (int j = 0; j <= 7; j++) {
-					if (brd[c.getY()][j] != ' ')
-						dist++;
-				}
+				dist = checkHorizontal(c, dist);
 				checkAndMarkHorizontal(pion, dist, moveList, markingOn);
 				break;
 			default:
@@ -644,6 +588,19 @@ public final class Engine {
 
 	}
 
+
+	public static List<Coordinates> getPointsFromBoard(char[][] board, char c) {
+		List<Coordinates> coordinates = new ArrayList<Coordinates>();
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+				if (board[x][y] == c) {
+					coordinates.add(new Coordinates(x, y));
+				}
+			}
+		}
+		return coordinates;
+	}
+
 	// *************************************************************
 	// Metody do udostêpnienia danych
 	// *************************************************************
@@ -664,5 +621,323 @@ public final class Engine {
 		return bot;
 	}
 
+	private static int checkVertical(Coordinates c, int dist) {
+		return checkVertical(c, dist, brd);
+	}
 
+	private static int checkVertical(Coordinates c, int dist, char board[][]) {
+		for (int j = 0; j <= 7; j++) {
+			if (board[j][c.getX()] != ' ')
+				dist++;
+		}
+		return dist;
+	}
+
+	private static int checkDownLeft(Coordinates c, int dist) {
+		return checkDownLeft(c, dist, brd);
+	}
+
+	private static int checkDownLeft(Coordinates c, int dist, char board[][]) {
+		int x2 = c.getX();
+		int y2 = c.getY();
+		x2++;
+		y2--;
+
+		// check upper-right corner
+		while (!out_of_boundary(x2, y2)) {
+			if ((board[y2][x2] != ' '))
+				dist++;
+			x2++;
+			y2--;
+		}
+		x2 = c.getX();
+		y2 = c.getY();
+		x2--;
+		y2++;
+		// check down-left corner
+		while (!out_of_boundary(x2, y2)) {
+			if ((board[y2][x2] != ' '))
+				dist++;
+			x2--;
+			y2++;
+		}
+		dist++;// remember to count the pawn (itself)!!
+		return dist;
+	}
+
+	private static int checkDownRight(Coordinates c, int dist) {
+		return checkDownRight(c, dist, brd);
+	}
+
+	private static int checkDownRight(Coordinates c, int dist, char board[][]) {
+		int x = c.getX();
+		int y = c.getY();
+		x--;
+		y--;
+
+		// check upper-left corner
+		while (!out_of_boundary(x, y)) {
+			if ((board[y][x] != ' ')) {
+				dist++;
+			}
+			x--;
+			y--;
+		}
+		x = c.getX();
+		y = c.getY();
+		x++;
+		y++;
+		// check down-right corner
+		while (!out_of_boundary(x, y)) {
+			if ((board[y][x] != ' '))
+				dist++;
+			x++;
+			y++;
+		}
+		dist++;// remember to count the pawn (itself)!!
+		return dist;
+	}
+
+	private static int checkHorizontal(Coordinates c, int dist) {
+		return checkHorizontal(c, dist, brd);
+	}
+
+	private static int checkHorizontal(Coordinates c, int dist, char[][] board) {
+
+		for (int j = 0; j <= 7; j++) {
+			if (board[c.getY()][j] != ' ')
+				dist++;
+		}
+		return dist;
+	}
+
+
+	public static List<TreeNodeContent> getPossibleMoves(char[][] board,
+			Coordinates coord) {
+		List<TreeNodeContent> contents = new ArrayList<TreeNodeContent>();
+
+		char col = board[coord.getY()][coord.getX()] == 'r' ? 'r' : 'w';
+		char col_negated = col == 'r' ? 'w' : 'r';
+		char temp_brd[][] = new char[8][8];
+		temp_brd = cloneBoard(board);
+
+		int dist = 0;
+		int x = coord.getX();
+		int y = coord.getY();
+		Pawn pion = getPawn(coord);
+		dist = checkHorizontal(coord, dist, board);
+
+		if (x - dist >= 0 && x - dist < 8) {
+			for (int b = x - 1; (b >= x - dist + 1) && b < 8 && b >= 0; b--) {
+				if (board[y][b] == col_negated) {
+					jump_flags[2] = true;
+					break;
+				}
+			}
+			if (board[y][x - dist] != col) {
+				if (jump_flags[2] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y][x - dist] = col;
+					Coordinates coordinatesFrom = new Coordinates(
+							pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
+							- dist, pion.getyPos());
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, temp_brd));
+
+				}
+				jump_flags[2] = false;
+			}
+		}
+		if (x + dist >= 0 && x + dist < 8) {
+			for (int b = x + 1; (b <= x + dist - 1) && b < 8 && b >= 0; b++) {
+				if (board[y][b] == col_negated) {
+					jump_flags[3] = true;
+					break;
+				}
+			}
+			if (board[y][x + dist] != col) {
+				if (jump_flags[3] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y][x + dist] = col;
+					Coordinates coordinatesFrom = new Coordinates(
+							pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
+							+ dist, pion.getyPos());
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, temp_brd));
+
+				}
+				jump_flags[3] = false;
+			}
+		}
+		// pass dist=0 - new case
+		dist = checkVertical(coord, 0, board);
+		if (y - dist >= 0 && y - dist < 8) {
+			for (int b = y - 1; (b >= y - dist + 1) && b < 8 && b >= 0; b--) {
+				if (board[b][x] == col_negated) {
+					jump_flags[0] = true;
+					break;
+				}
+			}
+			if (board[y - dist][x] != col) {
+				if (jump_flags[0] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y - dist][x] = col;
+					Coordinates coordinatesFrom = new Coordinates(coord.getX(),
+							coord.getY());
+					Coordinates coordinatesTo = new Coordinates(coord.getX(),
+							coord.getY() - dist);
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, temp_brd));
+
+				}
+				jump_flags[0] = false;
+			}
+		}
+		if (y + dist >= 0 && y + dist < 8) {
+			for (int b = y + 1; (b <= y + dist - 1) && b < 8 && b >= 0; b++) {
+				if (board[b][x] == col_negated) {
+					jump_flags[1] = true;
+					break;
+				}
+			}
+			if (board[y + dist][x] != col) {
+				if (jump_flags[1] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y + dist][x] = col;
+					Coordinates coordinatesFrom = new Coordinates(coord.getX(),
+							coord.getY());
+					Coordinates coordinatesTo = new Coordinates(coord.getX(),
+							coord.getY() + dist);
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, temp_brd));
+				}
+				jump_flags[1] = false;
+			}
+		}
+		// pass dist=0 - new case
+		dist = checkDownLeft(coord, 0, board);
+		if ((x + dist >= 0 && x + dist < 8) && (y - dist >= 0 && y - dist < 8)) {
+			for (int a = y - 1, b = x + 1; (b <= x + dist - 1) && b < 8
+					&& b >= 0 && (a >= y - dist + 1) && a >= 0 && a < 8; b++, a--) {
+				if (board[a][b] == col_negated) {
+					jump_flags[6] = true;
+					break;
+				}
+			}
+			if (board[y - dist][x + dist] != col) {
+				if (jump_flags[6] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y - dist][x + dist] = col;
+					Coordinates coordinatesFrom = new Coordinates(
+							pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
+							+ dist, pion.getyPos() - dist);
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, temp_brd));
+
+				}
+				jump_flags[6] = false;
+			}
+		}
+		if ((x - dist >= 0 && x - dist < 8) && (y + dist >= 0 && y + dist < 8)) {
+			for (int a = y + 1, b = x - 1; (b >= x - dist + 1) && b < 8
+					&& b >= 0 && (a <= y + dist - 1) && a >= 0 && a < 8; b--, a++) {
+				if (board[a][b] == col_negated) {
+					jump_flags[7] = true;
+					break;
+				}
+			}
+			if (board[y + dist][x - dist] != col) {
+				if (jump_flags[7] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y + dist][x - dist] = col;
+					Coordinates coordinatesFrom = new Coordinates(
+							pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
+							- dist, pion.getyPos() + dist);
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, countValue(pion, coordinatesTo)));
+
+				}
+				jump_flags[7] = false;
+			}
+		}
+		// pass dist=0 - new case
+		dist = checkDownRight(coord, 0, board);
+		if ((x + dist >= 0 && x + dist < 8) && (y + dist >= 0 && y + dist < 8)) {
+			for (int a = y + 1, b = x + 1; (b <= x + dist - 1) && b < 8
+					&& b >= 0 && (a <= y + dist - 1) && a >= 0 && a < 8; b++, a++) {
+				if (board[a][b] == col_negated) {
+					jump_flags[4] = true;
+					break;
+				}
+			}
+			if (board[y + dist][x + dist] != col) {
+				if (jump_flags[4] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y + dist][x + dist] = col;
+					Coordinates coordinatesFrom = new Coordinates(
+							pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
+							+ dist, pion.getyPos() + dist);
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, temp_brd));
+				}
+				jump_flags[4] = false;
+			}
+		}
+		if ((x - dist >= 0 && x - dist < 8) && (y - dist >= 0 && y - dist < 8)) {
+			for (int a = y + 1, b = x + 1; (b >= x - dist + 1) && b < 8
+					&& b >= 0 && (a >= y - dist + 1) && a >= 0 && a < 8; b--, a--) {
+				if (board[a][b] == col_negated) {
+					jump_flags[5] = true;
+					break;
+				}
+			}
+			if (board[y - dist][x - dist] != col) {
+				if (jump_flags[5] == false) {
+					// clear current position of pawn and generate board for
+					// move
+					temp_brd[y][x] = ' ';
+					temp_brd[y - dist][x - dist] = col;
+					Coordinates coordinatesFrom = new Coordinates(
+							pion.getxPos(), pion.getyPos());
+					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
+							- dist, pion.getyPos() - dist);
+					contents.add(new TreeNodeContent(coordinatesFrom,
+							coordinatesTo, temp_brd));
+
+				}
+				jump_flags[5] = false;
+			}
+		}
+
+		return contents;
+	}
+
+	public static char[][] cloneBoard(char[][] board) {
+		char[][] gameState = new char[8][8];
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				gameState[i][j] = board[i][j];
+			}
+		}
+		return gameState;
+	}
 }
