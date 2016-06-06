@@ -7,15 +7,17 @@ public class TreeNodeContent {
 	private char brd[][];
 	private Coordinates from;
 	private Coordinates to;
+	private double value;
 	
 	public TreeNodeContent() {
 		setBrd(new char[8][8]);
 	}
 	
 	public TreeNodeContent(Coordinates coordinates, Coordinates coordinates2,
-			char[][] board) {
+			double countValue, char[][] board) {
 		from = coordinates;
 		to = coordinates2;
+		value = countValue;
 		setBrd(board);
 	}
 
@@ -23,6 +25,7 @@ public class TreeNodeContent {
 			double countValue) {
 		from = coordinates;
 		to = coordinates2;
+		value = countValue;
 		setBrd(new char[8][8]);
 	}
 
@@ -40,6 +43,14 @@ public class TreeNodeContent {
 
 	public void setTo(Coordinates to) {
 		this.to = to;
+	}
+
+	public double getValue() {
+		return value;
+	}
+
+	public void setValue(double value) {
+		this.value = value;
 	}
 
 	public char[][] getBrd() {

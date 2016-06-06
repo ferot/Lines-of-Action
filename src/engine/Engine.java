@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bot.Bot;
+import bot.Tree;
+import bot.Tree.Node;
 import bot.TreeNodeContent;
 
 public final class Engine {
@@ -188,6 +190,7 @@ public final class Engine {
 	public static void changeTurn() {
 		turn = (turn == PlayerColor.WHITE ? PlayerColor.RED : PlayerColor.WHITE);
 		if (turn == bot.getColor()){
+			drawBoard();
 			bot.move(brd);
 		}
 	}
@@ -201,19 +204,19 @@ public final class Engine {
 			switch (direction) {
 			case VERTICAL:
 				dist = checkVertical(c, dist);
-				checkAndMarkVertical(pion, dist, moveList, markingOn);
+				checkAndMarkVertical(pion, dist);
 				break;
 			case DOWN_LEFT:
 				dist = checkDownLeft(c, dist);
-				checkAndMarkDownLeft(pion, dist, moveList, markingOn);
+				checkAndMarkDownLeft(pion, dist);
 				break;
 			case DOWN_RIGHT:
 				dist = checkDownRight(c, dist);
-				checkAndMarkDownRight(pion, dist, moveList, markingOn);
+				checkAndMarkDownRight(pion, dist);
 				break;
 			case HORIZONTAL:
 				dist = checkHorizontal(c, dist);
-				checkAndMarkHorizontal(pion, dist, moveList, markingOn);
+				checkAndMarkHorizontal(pion, dist);
 				break;
 			default:
 				break;
@@ -282,22 +285,23 @@ public final class Engine {
 	// ********************************************************************************
 	// Metody prywatne
 	// ********************************************************************************
-	private static double countValue(Pawn pawn, Coordinates coordinates) {
+	private static double countValue(Pawn pawn, Coordinates coordinates,
+			char[][] board) {
 		double sum = 0;
 		if (pawn.getColor() == PlayerColor.RED) {
 			for (Pawn red : reds) {
-				if (red == pawn){
+				if (red == pawn) {
 					sum += getDistance(reds, coordinates);
-				}else{
+				} else {
 					sum += getDistance(reds, red);
 				}
 			}
 		}
 		if (pawn.getColor() == PlayerColor.WHITE) {
 			for (Pawn white : whites) {
-				if (white == pawn){
+				if (white == pawn) {
 					sum += getDistance(whites, coordinates);
-				}else{
+				} else {
 					sum += getDistance(whites, white);
 				}
 			}
@@ -324,8 +328,7 @@ public final class Engine {
 		return distance;
 	}
 
-	private static void checkAndMarkVertical(Pawn pion, int dist,
-			List<TreeNodeContent> moveList, boolean markingOn) {
+	private static void checkAndMarkVertical(Pawn pion, int dist) {
 		int x = pion.getxPos();
 		int y = pion.getyPos();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
@@ -339,13 +342,8 @@ public final class Engine {
 			}
 			if (brd[y - dist][x] != col) {
 				if (jump_flags[0] == false){
-					Coordinates coordinatesFrom = new Coordinates(pion.getxPos(), pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos(), pion.getyPos() - dist);
-					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
-							countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[0] = false;
 			}
@@ -359,13 +357,8 @@ public final class Engine {
 			}
 			if (brd[y + dist][x] != col) {
 				if (jump_flags[1] == false){
-					Coordinates coordinatesFrom = new Coordinates(pion.getxPos(), pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos(), pion.getyPos() + dist);
-					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
-							countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[1] = false;
 			}
@@ -373,8 +366,7 @@ public final class Engine {
 	}
 
 
-	private static void checkAndMarkHorizontal(Pawn pion, int dist,
-			List<TreeNodeContent> moveList, boolean markingOn) {
+	private static void checkAndMarkHorizontal(Pawn pion, int dist) {
 		int x = pion.getxPos();
 		int y = pion.getyPos();
 		char col = pion.getColor() == PlayerColor.RED ? 'r' : 'w';
@@ -388,13 +380,8 @@ public final class Engine {
 			}
 			if (brd[y][x - dist] != col) {
 				if (jump_flags[2] == false){
-					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()-dist, pion.getyPos());
-					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
-							countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[2] = false;
 			}
@@ -408,21 +395,15 @@ public final class Engine {
 			}
 			if (brd[y][x + dist] != col) {
 				if (jump_flags[3] == false){
-					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()+dist, pion.getyPos());
-					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
-							countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[3] = false;
 			}
 		}
 	}
 
-	private static void checkAndMarkDownRight(Pawn pion, int dist,
-			List<TreeNodeContent> moveList, boolean markingOn) {
+	private static void checkAndMarkDownRight(Pawn pion, int dist) {
 		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
 		int x = c.getX();
 		int y = c.getY();
@@ -437,13 +418,8 @@ public final class Engine {
 			}
 			if (brd[y + dist][x + dist] != col) {
 				if (jump_flags[4] == false){
-					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()+dist, pion.getyPos()+dist);
-					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
-							countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[4] = false;
 			}
@@ -457,21 +433,15 @@ public final class Engine {
 			}
 			if (brd[y - dist][x - dist] != col) {
 				if (jump_flags[5] == false){
-					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()-dist, pion.getyPos()-dist);
-					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
-							countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[5] =false;
 			}
 		}
 	}
 
-	private static void checkAndMarkDownLeft(Pawn pion, int dist,
-			List<TreeNodeContent> moveList, boolean markingOn) {
+	private static void checkAndMarkDownLeft(Pawn pion, int dist) {
 		Coordinates c = new Coordinates(pion.getxPos(), pion.getyPos());
 		int x = c.getX();
 		int y = c.getY();
@@ -486,13 +456,8 @@ public final class Engine {
 			}
 			if (brd[y - dist][x + dist] != col) {
 				if (jump_flags[6] == false){
-					Coordinates coordinatesFrom = new Coordinates(pion.getxPos() , pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()+dist, pion.getyPos()-dist);
-					moveList.add(new TreeNodeContent(coordinatesFrom, coordinatesTo,
-							countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[6] = false;
 			}
@@ -506,15 +471,9 @@ public final class Engine {
 			}
 			if (brd[y + dist][x - dist] != col) {
 				if (jump_flags[7] == false) {
-					Coordinates coordinatesFrom = new Coordinates(
-							pion.getxPos(), pion.getyPos());
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos() + dist);
-					moveList.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo)));
-					if (markingOn) {
-						marker.add(new Marker(pion, coordinatesTo));
-					}
+					marker.add(new Marker(pion, coordinatesTo));
 				}
 				jump_flags[7] = false;
 			}
@@ -565,19 +524,7 @@ public final class Engine {
 	}
 
 	public static void drawBoard() {
-		System.out.println(" -------------------------");
-		for (int i = 0; i < 8; i++) {
-			System.out.print(i);
-			System.out.print("|");
-			for (int j = 0; j < 8; j++) {
-				System.out.print(brd[i][j] + " |");
-				if (j == 7)
-					System.out.print("\n");
-			}
-			System.out.println(" -------------------------");
-			if (i == 7)
-				System.out.println("   A  B  C  D  E  F  G  H");
-		}
+		drawBoard(brd);
 	}
 
 	private static boolean out_of_boundary(int x, int y) {
@@ -593,7 +540,7 @@ public final class Engine {
 		List<Coordinates> coordinates = new ArrayList<Coordinates>();
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
-				if (board[x][y] == c) {
+				if (board[y][x] == c) {
 					coordinates.add(new Coordinates(x, y));
 				}
 			}
@@ -745,7 +692,8 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos());
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, temp_brd));
+							coordinatesTo, countValue(pion, coordinatesTo, temp_brd),
+							temp_brd));
 
 				}
 				jump_flags[2] = false;
@@ -769,7 +717,9 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							+ dist, pion.getyPos());
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, temp_brd));
+							coordinatesTo, countValue(pion, coordinatesTo,
+									temp_brd),
+							temp_brd));
 
 				}
 				jump_flags[3] = false;
@@ -795,7 +745,9 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(coord.getX(),
 							coord.getY() - dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, temp_brd));
+							coordinatesTo, countValue(pion, coordinatesTo,
+									temp_brd),
+							temp_brd));
 
 				}
 				jump_flags[0] = false;
@@ -819,7 +771,9 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(coord.getX(),
 							coord.getY() + dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, temp_brd));
+							coordinatesTo, countValue(pion, coordinatesTo,
+									temp_brd),
+							temp_brd));
 				}
 				jump_flags[1] = false;
 			}
@@ -845,7 +799,9 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							+ dist, pion.getyPos() - dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, temp_brd));
+							coordinatesTo, countValue(pion, coordinatesTo,
+									temp_brd),
+							temp_brd));
 
 				}
 				jump_flags[6] = false;
@@ -870,7 +826,9 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos() + dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo)));
+							coordinatesTo, countValue(pion, coordinatesTo,
+									temp_brd),
+							temp_brd));
 
 				}
 				jump_flags[7] = false;
@@ -897,7 +855,9 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							+ dist, pion.getyPos() + dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, temp_brd));
+							coordinatesTo, countValue(pion, coordinatesTo,
+									temp_brd),
+							temp_brd));
 				}
 				jump_flags[4] = false;
 			}
@@ -921,7 +881,9 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos() - dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, temp_brd));
+							coordinatesTo, countValue(pion, coordinatesTo,
+									temp_brd),
+							temp_brd));
 
 				}
 				jump_flags[5] = false;
@@ -929,6 +891,63 @@ public final class Engine {
 		}
 
 		return contents;
+	}
+
+	private static void drawBoard(char[][] board) {
+		System.out.println(" -------------------------");
+		for (int i = 0; i < 8; i++) {
+			System.out.print(i);
+			System.out.print("|");
+			for (int j = 0; j < 8; j++) {
+				System.out.print(board[i][j] + " |");
+				if (j == 7)
+					System.out.print("\n");
+			}
+			System.out.println(" -------------------------");
+			if (i == 7)
+				System.out.println("   A  B  C  D  E  F  G  H");
+		}
+
+	}
+
+	public static Node<TreeNodeContent> findBestOption(
+			Tree<TreeNodeContent> tree, PlayerColor color) {
+		setDistanceHeuristic(tree, color);
+		setPawnBeatingHeuristic(tree, color);
+		setToCenterHeuristic(tree, color);
+		setSeparationFromGroupHeuristic(tree, color);
+		return getBestMove(tree, color);
+	}
+
+	private static Node<TreeNodeContent> getBestMove(
+			Tree<TreeNodeContent> tree,
+			PlayerColor color2) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static void setSeparationFromGroupHeuristic(
+			Tree<TreeNodeContent> tree,
+			PlayerColor color2) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void setToCenterHeuristic(Tree<TreeNodeContent> tree,
+			PlayerColor color2) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void setPawnBeatingHeuristic(Tree<TreeNodeContent> tree,
+			PlayerColor color2) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void setDistanceHeuristic(Tree<TreeNodeContent> tree,
+			PlayerColor color2) {
+
 	}
 
 	public static char[][] cloneBoard(char[][] board) {

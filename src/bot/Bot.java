@@ -26,7 +26,9 @@ public class Bot {
 		gameTree = new Tree<TreeNodeContent>(root, DEEP);
 		if (color == Engine.getTurn()) {
 			createTree(gameTree, board, DEEP);
-			Node<TreeNodeContent> node = findBestOption(gameTree, color);
+			// Node<TreeNodeContent> node = Engine.findBestOption(gameTree,
+			// color);
+			Node<TreeNodeContent> node = gameTree.getMinimumValue(1);
 			Pawn temp = Engine.getPawn(node.getData().getFrom());
 			Engine.move(temp, node.getData().getTo());
 			Engine.checkGameFinished();
@@ -84,44 +86,6 @@ public class Bot {
 		}
 
 		return nodes;
-	}
-
-	private Node<TreeNodeContent> findBestOption(Tree<TreeNodeContent> tree,
-			PlayerColor color) {
-		setDistanceHeuristic(tree, color);
-		setPawnBeatingHeuristic(tree, color);
-		setToCenterHeuristic(tree, color);
-		setSeparationFromGroupHeuristic(tree, color);
-		return getBestMove(tree, color);
-	}
-
-	private Node<TreeNodeContent> getBestMove(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private void setSeparationFromGroupHeuristic(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void setToCenterHeuristic(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void setPawnBeatingHeuristic(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void setDistanceHeuristic(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
-
 	}
 
 	private PlayerColor changeTurn(PlayerColor turn) {
