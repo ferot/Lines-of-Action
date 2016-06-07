@@ -94,8 +94,8 @@ public class Tree<T> {
 		double max = -1;
 		Node<T> maxNode = new Node<T>();
 		for (Node<T> node : nodesAtDeep) {
-			if (node.value > max) {
-				max = node.value;
+			if (((TreeNodeContent) node.getData()).getValue() > max) {
+				max = ((TreeNodeContent) node.getData()).getValue();
 				maxNode = node;
 			}
 		}
@@ -106,11 +106,12 @@ public class Tree<T> {
 		double min = Integer.MAX_VALUE;
 		Node<T> minNode = new Node<T>();
 		for (Node<T> node : nodesAtDeep) {
-			if ((node.value) < min) {
-				min = node.value;
+			if (((TreeNodeContent) node.getData()).getValue() < min) {
+				min = ((TreeNodeContent) node.getData()).getValue();
 				minNode = node;
 			}
 		}
+		System.out.println(minNode.value);
 		return minNode;
 	}
 

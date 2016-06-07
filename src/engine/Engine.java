@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bot.Bot;
-import bot.Tree;
-import bot.Tree.Node;
 import bot.TreeNodeContent;
 
 public final class Engine {
@@ -285,48 +283,40 @@ public final class Engine {
 	// ********************************************************************************
 	// Metody prywatne
 	// ********************************************************************************
-	private static double countValue(Pawn pawn, Coordinates coordinates,
+	// HEURYSTYKI
+	private static double countHeuristics(Pawn pawn, Coordinates coordinates,
 			char[][] board) {
-		double sum = 0;
-		if (pawn.getColor() == PlayerColor.RED) {
-			for (Pawn red : reds) {
-				if (red == pawn) {
-					sum += getDistance(reds, coordinates);
-				} else {
-					sum += getDistance(reds, red);
-				}
-			}
-		}
-		if (pawn.getColor() == PlayerColor.WHITE) {
-			for (Pawn white : whites) {
-				if (white == pawn) {
-					sum += getDistance(whites, coordinates);
-				} else {
-					sum += getDistance(whites, white);
-				}
-			}
-		}
-		return sum;
+		double distance = setDistanceHeuristic(pawn, coordinates, board);
+		double toCenter = setToCenterHeuristic(pawn, coordinates, board);
+		boolean separation = setSeparationFromGroupHeuristic(pawn, coordinates, board);
+		boolean beating = setPawnBeatingHeuristic(pawn, coordinates, board);
+		return handleValues(distance, toCenter, separation, beating);
 	}
 	
+	private static double handleValues(double distance, double toCenter,
+			boolean separation, boolean beating) {
+		return 0;
+	}
+
 	private static double getDistance(List<Pawn> list,
-			Coordinates coordinates) {
+			Coordinates coordinates, Pawn pawn) {
 		int distance = 0;
 		for (Pawn element : list) {
-			distance += Math.sqrt(Math.abs(element.getxPos() -coordinates.getX())
+			if ( element != pawn)
+				distance += Math.sqrt(Math.abs(element.getxPos() -coordinates.getX())
 					+ Math.abs(element.getyPos() - coordinates.getY()));
 		}
 		return distance;
 	}
 
-	private static int getDistance(List<Pawn> list, Pawn pawn) {
-		int distance = 0;
-		for (Pawn element : list) {
-			distance += Math.sqrt(Math.abs(element.getxPos() - pawn.getxPos())
-					+ Math.abs(element.getyPos() - pawn.getyPos()));
-		}
-		return distance;
-	}
+//	private static int getDistance(List<Pawn> list, Pawn pawn) {
+//		int distance = 0;
+//		for (Pawn element : list) {
+//			distance += Math.sqrt(Math.abs(element.getxPos() - pawn.getxPos())
+//					+ Math.abs(element.getyPos() - pawn.getyPos()));
+//		}
+//		return distance;
+//	}
 
 	private static void checkAndMarkVertical(Pawn pion, int dist) {
 		int x = pion.getxPos();
@@ -692,7 +682,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos());
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo, temp_brd),
+							coordinatesTo, countHeuristics(pion, coordinatesTo, temp_brd),
 							temp_brd));
 
 				}
@@ -717,7 +707,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							+ dist, pion.getyPos());
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo,
+							coordinatesTo, countHeuristics(pion, coordinatesTo,
 									temp_brd),
 							temp_brd));
 
@@ -745,7 +735,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(coord.getX(),
 							coord.getY() - dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo,
+							coordinatesTo, countHeuristics(pion, coordinatesTo,
 									temp_brd),
 							temp_brd));
 
@@ -771,7 +761,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(coord.getX(),
 							coord.getY() + dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo,
+							coordinatesTo, countHeuristics(pion, coordinatesTo,
 									temp_brd),
 							temp_brd));
 				}
@@ -799,7 +789,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							+ dist, pion.getyPos() - dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo,
+							coordinatesTo, countHeuristics(pion, coordinatesTo,
 									temp_brd),
 							temp_brd));
 
@@ -826,7 +816,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos() + dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo,
+							coordinatesTo, countHeuristics(pion, coordinatesTo,
 									temp_brd),
 							temp_brd));
 
@@ -855,7 +845,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							+ dist, pion.getyPos() + dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo,
+							coordinatesTo, countHeuristics(pion, coordinatesTo,
 									temp_brd),
 							temp_brd));
 				}
@@ -881,7 +871,7 @@ public final class Engine {
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos() - dist);
 					contents.add(new TreeNodeContent(coordinatesFrom,
-							coordinatesTo, countValue(pion, coordinatesTo,
+							coordinatesTo, countHeuristics(pion, coordinatesTo,
 									temp_brd),
 							temp_brd));
 
@@ -910,44 +900,50 @@ public final class Engine {
 
 	}
 
-	public static Node<TreeNodeContent> findBestOption(
-			Tree<TreeNodeContent> tree, PlayerColor color) {
-		setDistanceHeuristic(tree, color);
-		setPawnBeatingHeuristic(tree, color);
-		setToCenterHeuristic(tree, color);
-		setSeparationFromGroupHeuristic(tree, color);
-		return getBestMove(tree, color);
-	}
+	// public static Node<TreeNodeContent> findBestOption(
+	// Tree<TreeNodeContent> tree, PlayerColor color) {
+	// setDistanceHeuristic(tree, color);
+	// setPawnBeatingHeuristic(tree, color);
+	// setToCenterHeuristic(tree, color);
+	// setSeparationFromGroupHeuristic(tree, color);
+	// return getBestMove(tree, color);
+	// }
 
-	private static Node<TreeNodeContent> getBestMove(
-			Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
+	// private static Node<TreeNodeContent> getBestMove(
+	// Tree<TreeNodeContent> tree,
+	// PlayerColor color2) {
+	// // TODO Auto-generated method stub
+	// return null;
+	// }
+
+	private static boolean setSeparationFromGroupHeuristic(Pawn pawn,
+			Coordinates coordinates, char[][] board) {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 
-	private static void setSeparationFromGroupHeuristic(
-			Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
+	private static double setToCenterHeuristic(Pawn pawn,
+			Coordinates coordinates, char[][] board) {
 		// TODO Auto-generated method stub
-
+		return 0;
 	}
 
-	private static void setToCenterHeuristic(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
+	private static boolean setPawnBeatingHeuristic(Pawn pawn,
+			Coordinates coordinates, char[][] board) {
 		// TODO Auto-generated method stub
-
+		return false;
 	}
 
-	private static void setPawnBeatingHeuristic(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private static void setDistanceHeuristic(Tree<TreeNodeContent> tree,
-			PlayerColor color2) {
-
+	private static double setDistanceHeuristic(Pawn pawn,
+			Coordinates coordinates, char[][] board) {
+		double sum = 0;
+		if (pawn.getColor() == PlayerColor.RED) {
+			sum = getDistance(reds, coordinates, pawn);
+		}
+		if (pawn.getColor() == PlayerColor.WHITE) {
+			sum = getDistance(whites, coordinates, pawn);
+		}
+		return sum;
 	}
 
 	public static char[][] cloneBoard(char[][] board) {

@@ -26,6 +26,8 @@ public class Bot {
 		gameTree = new Tree<TreeNodeContent>(root, DEEP);
 		if (color == Engine.getTurn()) {
 			createTree(gameTree, board, DEEP);
+			//MIN_MAX
+			TreeNodeContent content = minMax(gameTree.getRoot(), DEEP);
 			// Node<TreeNodeContent> node = Engine.findBestOption(gameTree,
 			// color);
 			Node<TreeNodeContent> node = gameTree.getMinimumValue(1);
@@ -37,11 +39,37 @@ public class Bot {
 		}
 	}
 
+	private TreeNodeContent minMax(Node<TreeNodeContent> node, int deep) {
+		if (deep == 0) {
+			return node.getData();
+		} else if (deep % 2 == DEEP % 2) { // MAKSYMALIZACJA
+			TreeNodeContent max = new TreeNodeContent();
+			max.setValue(Double.MIN_VALUE);
+			for (Node<TreeNodeContent> child : node.getChildren()) {
+				TreeNodeContent tmp = minMax(child, deep - 1);
+				if (tmp.getValue() > max.getValue()) {
+					max = tmp;
+				}
+			}
+			return max;
+		} else { // MINIMALIZACJA
+			TreeNodeContent min = new TreeNodeContent();
+			min.setValue(Double.MAX_VALUE);
+			for (Node<TreeNodeContent> child : node.getChildren()) {
+				TreeNodeContent tmp = minMax(child, deep - 1);
+				if (tmp.getValue() < min.getValue()) {
+					min = tmp;
+				}
+			}
+			return min;
+		}
+	}
+
 	private void createTree(Tree<TreeNodeContent> tree,
 			char [][] board, int deep) {
 		PlayerColor turn = color;
-		for (int current = 0; current < deep; current++) {
-			for (Node<TreeNodeContent> node : nodesAtLevel(tree.getRoot(), current)) {
+		for (int currentDeep = 0; currentDeep < deep; currentDeep++) {
+			for (Node<TreeNodeContent> node : nodesAtLevel(tree.getRoot(), currentDeep)) {
 				createChildren(tree, node, Engine.cloneBoard(board), turn);
 			}
 			turn = changeTurn(turn);
