@@ -60,4 +60,5 @@ public class TreeNodeContent {
 	public void setBrd(char brd[][]) {
 		this.brd = brd;
 	}
+
 }

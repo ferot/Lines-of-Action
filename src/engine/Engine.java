@@ -295,7 +295,7 @@ public final class Engine {
 	
 	private static double handleValues(double distance, double toCenter,
 			boolean separation, boolean beating) {
-		return 0;
+		return 100 - distance;
 	}
 
 	private static double getDistance(List<Pawn> list,
@@ -303,8 +303,8 @@ public final class Engine {
 		int distance = 0;
 		for (Pawn element : list) {
 			if ( element != pawn)
-				distance += Math.sqrt(Math.abs(element.getxPos() -coordinates.getX())
-					+ Math.abs(element.getyPos() - coordinates.getY()));
+				distance += Math.sqrt(Math.pow(element.getxPos() -coordinates.getX(), 2)
+					+ Math.pow(element.getyPos() - coordinates.getY(),2));
 		}
 		return distance;
 	}
@@ -661,7 +661,7 @@ public final class Engine {
 		int dist = 0;
 		int x = coord.getX();
 		int y = coord.getY();
-		Pawn pion = getPawn(coord);
+		Pawn pion = getPawn(board, coord);
 		dist = checkHorizontal(coord, dist, board);
 
 		if (x - dist >= 0 && x - dist < 8) {
@@ -675,10 +675,18 @@ public final class Engine {
 				if (jump_flags[2] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y][x - dist] = col;
-					Coordinates coordinatesFrom = new Coordinates(
+					Coordinates coordinatesFrom = null;
+					try {
+						coordinatesFrom = new Coordinates(
 							pion.getxPos(), pion.getyPos());
+					} catch (NullPointerException ex) {
+						drawBoard(board);
+						System.out.println(coord.getX() + ", " + coord.getY());
+						ex.printStackTrace();
+					}
 					Coordinates coordinatesTo = new Coordinates(pion.getxPos()
 							- dist, pion.getyPos());
 					contents.add(new TreeNodeContent(coordinatesFrom,
@@ -700,6 +708,7 @@ public final class Engine {
 				if (jump_flags[3] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y][x + dist] = col;
 					Coordinates coordinatesFrom = new Coordinates(
@@ -728,6 +737,7 @@ public final class Engine {
 				if (jump_flags[0] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y - dist][x] = col;
 					Coordinates coordinatesFrom = new Coordinates(coord.getX(),
@@ -754,6 +764,7 @@ public final class Engine {
 				if (jump_flags[1] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y + dist][x] = col;
 					Coordinates coordinatesFrom = new Coordinates(coord.getX(),
@@ -782,6 +793,7 @@ public final class Engine {
 				if (jump_flags[6] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y - dist][x + dist] = col;
 					Coordinates coordinatesFrom = new Coordinates(
@@ -809,6 +821,7 @@ public final class Engine {
 				if (jump_flags[7] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y + dist][x - dist] = col;
 					Coordinates coordinatesFrom = new Coordinates(
@@ -838,6 +851,7 @@ public final class Engine {
 				if (jump_flags[4] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y + dist][x + dist] = col;
 					Coordinates coordinatesFrom = new Coordinates(
@@ -864,6 +878,7 @@ public final class Engine {
 				if (jump_flags[5] == false) {
 					// clear current position of pawn and generate board for
 					// move
+					temp_brd = cloneBoard(board);
 					temp_brd[y][x] = ' ';
 					temp_brd[y - dist][x - dist] = col;
 					Coordinates coordinatesFrom = new Coordinates(
@@ -879,11 +894,28 @@ public final class Engine {
 				jump_flags[5] = false;
 			}
 		}
-
+		for (TreeNodeContent content : contents) {
+			System.out.print(content.getValue() + ", ");
+		}
 		return contents;
 	}
 
-	private static void drawBoard(char[][] board) {
+	public static Pawn getPawn(char[][] board, Coordinates coord) {
+		if (board[coord.getY()][coord.getX()] == 'r') {
+			Pawn p = new Pawn(PlayerColor.RED, 0);
+			p.setxPos(coord.getY());
+			p.setyPos(coord.getX());
+			return p;
+		} else if (board[coord.getY()][coord.getX()] == 'w') {
+			Pawn p = new Pawn(PlayerColor.WHITE, 0);
+			p.setxPos(coord.getY());
+			p.setyPos(coord.getX());
+			return p;
+		}
+		return null;
+	}
+
+	public static void drawBoard(char[][] board) {
 		System.out.println(" -------------------------");
 		for (int i = 0; i < 8; i++) {
 			System.out.print(i);
