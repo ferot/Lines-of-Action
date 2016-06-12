@@ -18,7 +18,7 @@ public class Bot {
 	public Bot(PlayerColor color) {
 		this.color = color;
 		TreeNodeContent root = new TreeNodeContent();
-		gameTree = new Tree<TreeNodeContent>(root, DEEP);
+		gameTree = new Tree<TreeNodeContent>(root, 0, color);
 	}
 
 	// public void move(char[][] board) {
@@ -47,38 +47,36 @@ public class Bot {
 	public void move(char[][] board) {
 		TreeNodeContent root = new TreeNodeContent();
 		root.setBrd(board);
-		gameTree = new Tree<TreeNodeContent>(root, DEEP);
+		gameTree = new Tree<TreeNodeContent>(root, 0, color);
 		if (color == Engine.getTurn()) {
 			createTree(gameTree, DEEP);
 			// MIN_MAX
-			Node<TreeNodeContent> alpha = initNode(gameTree.getRoot(), -100000); // TODO
-																					// WARTOSCI
-															// DOBRANE Z
-														// HEURYSTYK
-			Node<TreeNodeContent> beta = initNode(gameTree.getRoot(), 100000);
-			Node<TreeNodeContent> node = alphaBeta(gameTree.getRoot(), DEEP,
-					alpha, beta);
-			while (node.getParent() != null && node.getParent().getParent() != null) {
+//			Node<TreeNodeContent> alpha = initNode(gameTree.getRoot(), -100000); // TODO
+//																					// WARTOSCI
+//															// DOBRANE Z
+//														// HEURYSTYK
+//			Node<TreeNodeContent> beta = initNode(gameTree.getRoot(), 100000);
+			Node<TreeNodeContent> node = minMax(gameTree.getRoot(), DEEP);
+
+			while (node.getParent() != null
+					&& node.getParent().getParent() != null) {
+				Engine.drawBoard(node.getData().getBrd());
 				node = node.getParent();
 			}
-			// Node<TreeNodeContent> node = Engine.findBestOption(gameTree,
-			// color);
-			// Node<TreeNodeContent> node = gameTree.getMinimumValue(1);
-			Pawn temp = Engine.getPawn(node.getData().getBrd(),node.getData().getFrom());
+			Engine.drawBoard(node.getParent().getData().getBrd());
+			Engine.drawBoard(node.getData().getBrd());
+			System.out.println("FROM X: " + node.getData().getFrom().getX() + ", Y = " + node.getData().getFrom().getY());
+			System.out.println("TO X: " + node.getData().getTo().getX() + ", Y = " + node.getData().getTo().getY());
+			// node.getData().setFrom(new
+			// Coordinates(node.getData().getFrom().getY(),
+			// node.getData().getFrom().getX()));
+			Pawn temp = Engine.getPawn(node.getData().getFrom());
 			Engine.move(temp, node.getData().getTo());
+			Engine.setBoard(node.getData().getBrd());
 			Engine.checkGameFinished();
 			Launcher.getBoard().repaint();
 			Engine.changeTurn();
 		}
-	}
-
-	private Node<TreeNodeContent> initNode(Node<TreeNodeContent> node, int i) {
-		Node<TreeNodeContent> alpha = new Node<TreeNodeContent>();
-		alpha.setData(cloneData(node.getData()));
-		alpha.setChildren(node.getChildren());
-		alpha.setParent(node.getParent());
-		alpha.getData().setValue(i);
-		return alpha;
 	}
 
 	private Node<TreeNodeContent> initNode(Node<TreeNodeContent> node) {
@@ -91,7 +89,7 @@ public class Bot {
 
 	private TreeNodeContent cloneData(TreeNodeContent data) {
 		TreeNodeContent content = new TreeNodeContent();
-		content.setBrd(data.getBrd());
+		content.setBrd(Engine.cloneBoard(data.getBrd()));
 		content.setFrom(data.getFrom());
 		content.setTo(data.getTo());
 		content.setValue(data.getValue());
@@ -139,6 +137,30 @@ public class Bot {
 		}
 	}
 
+	private Node<TreeNodeContent> minMax(Node<TreeNodeContent> node, int deep) {
+		if (deep == 0) {
+			return node;
+		} else if (node.getColor() == this.color) { // MAKSYMALIZACJA
+			Node<TreeNodeContent> max = node;
+			for (Node<TreeNodeContent> child : node.getChildren()) {
+				Node<TreeNodeContent> tmp = minMax(child, deep - 1);
+				if (tmp.getData().getValue() > max.getData().getValue()) {
+					max = tmp;
+				}
+			}
+			return max;
+		} else { // MINIMALIZACJA
+			Node<TreeNodeContent> min = node;
+			for (Node<TreeNodeContent> child : node.getChildren()) {
+				Node<TreeNodeContent> tmp = minMax(child, deep - 1);
+				if (tmp.getData().getValue() < min.getData().getValue()) {
+					min = tmp;
+				}
+			}
+			return min;
+		}
+	}
+
 	// private TreeNodeContent minMax(Node<TreeNodeContent> node, int deep) {
 	// if (deep == 0) {
 	// return node.getData();
@@ -167,7 +189,7 @@ public class Bot {
 
 	private void createTree(Tree<TreeNodeContent> tree, int deep) {
 		PlayerColor turn;
-		turn = color;
+		turn = tree.getRoot().getColor();
 		for (int currentDeep = 0; currentDeep < deep; currentDeep++) {
 			for (Node<TreeNodeContent> node : nodesAtLevel(tree.getRoot(), currentDeep)) {
 				createChildren(tree, node, turn);

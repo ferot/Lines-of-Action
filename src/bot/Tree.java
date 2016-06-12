@@ -3,16 +3,18 @@ package bot;
 import java.util.ArrayList;
 import java.util.List;
 
+import enums.PlayerColor;
+
 public class Tree<T> {
 	private Node<T> root;
-	private int maxDeep;
 
-	public Tree(T rootData, int deep) {
+	public Tree(T rootData, int deep, PlayerColor p) {
 		root = new Node<T>();
-		maxDeep = deep;
 		root.data = rootData;
 		root.parent = null;
 		root.children = new ArrayList<Node<T>>();
+		root.deep = deep;
+		root.color = p;
 	}
 
 	public void add(Node<T> parent, T data) {
@@ -20,6 +22,8 @@ public class Tree<T> {
 		child.data = data;
 		child.parent = parent;
 		child.children = new ArrayList<Node<T>>();
+		child.deep = parent.deep + 1;
+		child.color = parent.color == PlayerColor.WHITE? PlayerColor.RED : PlayerColor.WHITE;
 		parent.children.add(child);
 	}
 
@@ -117,6 +121,8 @@ public class Tree<T> {
 		private T data;
 		private Node<T> parent;
 		private List<Node<T>> children;
+		private int deep = 0;
+		private PlayerColor color;
 
 		public T getData() {
 			return data;
@@ -140,6 +146,22 @@ public class Tree<T> {
 
 		public void setParent(Node<T> parent) {
 			this.parent = parent;
+		}
+
+		public int getDeep() {
+			return deep;
+		}
+
+		public void setDeep(int deep) {
+			this.deep = deep;
+		}
+
+		public PlayerColor getColor() {
+			return color;
+		}
+
+		public void setColor(PlayerColor color) {
+			this.color = color;
 		}
 	}
 

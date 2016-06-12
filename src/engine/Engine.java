@@ -148,12 +148,12 @@ public final class Engine {
 		boolean finished = true;
 		int temp = -1;
 		int i = 0;
-		for (Pawn pawn : iterate) {
+		for (Pawn pwn : iterate) {
 			if (i == 0) {
-				temp = pawn.getCurrentNumber();
+				temp = pwn.getCurrentNumber();
 				i++;
 			} else {
-				if (pawn.getCurrentNumber() != temp) {
+				if (pwn.getCurrentNumber() != temp) {
 					finished = false;
 					break;
 				}
@@ -187,9 +187,16 @@ public final class Engine {
 
 	public static void changeTurn() {
 		turn = (turn == PlayerColor.WHITE ? PlayerColor.RED : PlayerColor.WHITE);
-		if (turn == bot.getColor()){
-			drawBoard();
-			bot.move(brd);
+		if (turn == bot.getColor() && !Board.isGameFinished()) {
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					bot.move(brd);
+					
+				}
+			}).start();
+			
 		}
 	}
 
@@ -286,16 +293,12 @@ public final class Engine {
 	// HEURYSTYKI
 	private static double countHeuristics(Pawn pawn, Coordinates coordinates,
 			char[][] board) {
-		double distance = setDistanceHeuristic(pawn, coordinates, board);
-		double toCenter = setToCenterHeuristic(pawn, coordinates, board);
-		boolean separation = setSeparationFromGroupHeuristic(pawn, coordinates, board);
+		double distance = setDistanceHeuristic(pawn, coordinates);
+		double toCenter = setToCenterHeuristic(pawn, coordinates);
+		int separation = setSeparationFromGroupHeuristic(pawn, coordinates,
+				board);
 		boolean beating = setPawnBeatingHeuristic(pawn, coordinates, board);
 		return handleValues(distance, toCenter, separation, beating);
-	}
-	
-	private static double handleValues(double distance, double toCenter,
-			boolean separation, boolean beating) {
-		return 100 - distance;
 	}
 
 	private static double getDistance(List<Pawn> list,
@@ -415,7 +418,8 @@ public final class Engine {
 			}
 		}
 		if ((x - dist >= 0 && x - dist < 8) && (y - dist >= 0 && y - dist < 8)) {
-			for (int a = y + 1, b = x + 1; (b >= x - dist + 1) && b < 8 && b >= 0 && (a >= y - dist + 1) && a >= 0 && a < 8; b--, a--) {
+			for (int a = y - 1, b = x - 1; (b >= x - dist + 1) && b < 8
+					&& b >= 0 && (a >= y - dist + 1) && a >= 0 && a < 8; b--, a--) {
 				if (brd[a][b] == col_negated) {
 					jump_flags[5] = true;
 					break;
@@ -530,8 +534,8 @@ public final class Engine {
 		List<Coordinates> coordinates = new ArrayList<Coordinates>();
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
-				if (board[y][x] == c) {
-					coordinates.add(new Coordinates(x, y));
+				if (board[x][y] == c) {
+					coordinates.add(new Coordinates(y, x));
 				}
 			}
 		}
@@ -652,15 +656,14 @@ public final class Engine {
 	public static List<TreeNodeContent> getPossibleMoves(char[][] board,
 			Coordinates coord) {
 		List<TreeNodeContent> contents = new ArrayList<TreeNodeContent>();
-
-		char col = board[coord.getY()][coord.getX()] == 'r' ? 'r' : 'w';
-		char col_negated = col == 'r' ? 'w' : 'r';
-		char temp_brd[][] = new char[8][8];
-		temp_brd = cloneBoard(board);
-
-		int dist = 0;
 		int x = coord.getX();
 		int y = coord.getY();
+
+		char col = board[y][x] == 'r' ? 'r' : 'w';
+		char col_negated = col == 'r' ? 'w' : 'r';
+		char temp_brd[][] = new char[8][8];
+
+		int dist = 0;
 		Pawn pion = getPawn(board, coord);
 		dist = checkHorizontal(coord, dist, board);
 
@@ -867,7 +870,7 @@ public final class Engine {
 			}
 		}
 		if ((x - dist >= 0 && x - dist < 8) && (y - dist >= 0 && y - dist < 8)) {
-			for (int a = y + 1, b = x + 1; (b >= x - dist + 1) && b < 8
+			for (int a = y - 1, b = x - 1; (b >= x - dist + 1) && b < 8
 					&& b >= 0 && (a >= y - dist + 1) && a >= 0 && a < 8; b--, a--) {
 				if (board[a][b] == col_negated) {
 					jump_flags[5] = true;
@@ -894,22 +897,19 @@ public final class Engine {
 				jump_flags[5] = false;
 			}
 		}
-		for (TreeNodeContent content : contents) {
-			System.out.print(content.getValue() + ", ");
-		}
 		return contents;
 	}
 
 	public static Pawn getPawn(char[][] board, Coordinates coord) {
 		if (board[coord.getY()][coord.getX()] == 'r') {
 			Pawn p = new Pawn(PlayerColor.RED, 0);
-			p.setxPos(coord.getY());
-			p.setyPos(coord.getX());
+			p.setxPos(coord.getX());
+			p.setyPos(coord.getY());
 			return p;
 		} else if (board[coord.getY()][coord.getX()] == 'w') {
 			Pawn p = new Pawn(PlayerColor.WHITE, 0);
-			p.setxPos(coord.getY());
-			p.setyPos(coord.getX());
+			p.setxPos(coord.getX());
+			p.setyPos(coord.getY());
 			return p;
 		}
 		return null;
@@ -932,42 +932,106 @@ public final class Engine {
 
 	}
 
-	// public static Node<TreeNodeContent> findBestOption(
-	// Tree<TreeNodeContent> tree, PlayerColor color) {
-	// setDistanceHeuristic(tree, color);
-	// setPawnBeatingHeuristic(tree, color);
-	// setToCenterHeuristic(tree, color);
-	// setSeparationFromGroupHeuristic(tree, color);
-	// return getBestMove(tree, color);
-	// }
-
-	// private static Node<TreeNodeContent> getBestMove(
-	// Tree<TreeNodeContent> tree,
-	// PlayerColor color2) {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-
-	private static boolean setSeparationFromGroupHeuristic(Pawn pawn,
-			Coordinates coordinates, char[][] board) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	private static double setToCenterHeuristic(Pawn pawn,
-			Coordinates coordinates, char[][] board) {
-		// TODO Auto-generated method stub
-		return 0;
+			Coordinates coordinates) {
+		double distance = 0;
+		double prev_distance = 0;
+		int x = pawn.getxPos(), y = pawn.getyPos();
+		Coordinates center = new Coordinates(4, 4);
+		prev_distance = Math.sqrt(Math.pow(x - center.getX(), 2)
+				+ Math.pow(y - center.getY(), 2));
+		distance = Math.sqrt(Math.pow(coordinates.getX() - center.getX(), 2)
+				+ Math.pow(coordinates.getY() - center.getY(), 2));
+		return prev_distance - distance;
 	}
 
 	private static boolean setPawnBeatingHeuristic(Pawn pawn,
 			Coordinates coordinates, char[][] board) {
-		// TODO Auto-generated method stub
-		return false;
+		int x = coordinates.getX();
+		int y = coordinates.getY();
+		char col_negated = pawn.getColor() == PlayerColor.RED ? 'w' : 'r';
+		if (board[y][x] == col_negated)
+			return true;
+		else
+			return false;
+	}
+
+	private static double handleValues(double distance, double toCenter,
+			int separation, boolean beating) {
+		double heuristic = 0;
+		distance = 100 - distance;
+		double s = 1.0, b = 1.0, c = 1.0;
+		s = 1.0 + separation * 0.3;
+
+		if (beating)
+			b = 0.9;
+
+		if (toCenter < 1)
+			c = 0.8;
+		if (toCenter < 2)
+			c = 1.2;
+		if (toCenter < 3)
+			c = 1.5;
+		heuristic = distance * s * b * c;
+		return heuristic;
+	}
+
+	private static int setSeparationFromGroupHeuristic(Pawn pawn,
+			Coordinates coordinates, char[][] board) {
+		int cur_size = 0;
+		List<Pawn> tempList = null;
+		List<Pawn> iterate = pawn.getColor() == PlayerColor.RED ? reds : whites;
+
+		for (Pawn pwn : iterate) {
+			tempList = getNeighbours(pwn);
+			cur_size = tempList.size();
+			if (cur_size > 0) {
+				for (Pawn pawns : tempList) {
+					updateListNumber(pawns.getCurrentNumber(),
+							pwn.getCurrentNumber(), iterate);
+				}
+			}
+		}
+		int cur_id = 0;
+		for (Pawn pwn : iterate) {
+			if (pwn.getCurrentNumber() == pawn.getCurrentNumber()) {
+				cur_id++;
+			}
+		}
+		resetPawnsNumber(iterate);
+
+		int current = -1;
+		for (Pawn pwn : iterate) {
+			if (pwn.getxPos() == pawn.getxPos()
+					&& pwn.getyPos() == pawn.getyPos()) {
+				current = pwn.getCurrentNumber();
+				pwn = new Pawn(pwn.getColor(), pwn.getCurrentNumber());
+				pwn.setxPos(coordinates.getX());
+				pwn.setyPos(coordinates.getY());
+
+			}
+			tempList = getNeighbours(pwn);
+			cur_size = tempList.size();
+			if (cur_size > 0) {
+				for (Pawn pawns : tempList) {
+					updateListNumber(pawns.getCurrentNumber(),
+							pwn.getCurrentNumber(), iterate);
+				}
+			}
+		}
+		int pred_id = 0;
+		for (Pawn pwn : iterate) {
+			if (pwn.getCurrentNumber() == current) {
+				pred_id++;
+			}
+		}
+		resetPawnsNumber(iterate);
+
+		return cur_id - pred_id;
 	}
 
 	private static double setDistanceHeuristic(Pawn pawn,
-			Coordinates coordinates, char[][] board) {
+			Coordinates coordinates) {
 		double sum = 0;
 		if (pawn.getColor() == PlayerColor.RED) {
 			sum = getDistance(reds, coordinates, pawn);
@@ -986,5 +1050,14 @@ public final class Engine {
 			}
 		}
 		return gameState;
+	}
+
+	public static void setBoard(char[][] brd2) {
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+				brd[x][y] = brd2[x][y];
+			}
+		}
+
 	}
 }
